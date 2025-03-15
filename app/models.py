@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database import Base, engine, SessionLocal
+from app.database import Base, engine, SessionLocal
 from sqlalchemy import Column, Integer, Float, String
 
 class Transaction(Base):

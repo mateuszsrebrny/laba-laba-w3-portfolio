@@ -6,10 +6,10 @@ from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from models import Transaction, get_db
+from app.models import Transaction, get_db
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 # Home page - Show transactions
 @app.get("/", response_class=HTMLResponse)
