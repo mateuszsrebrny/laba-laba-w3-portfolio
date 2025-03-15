@@ -52,6 +52,22 @@ docker compose run test
 
 ---
 
+## :pickaxe: Useful dev commands
+
+### Start the app
+
+```bash 
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Select from the db
+
+```bash
+docker exec -it laba-laba-dev-db psql -U ll_dev_user -d laba_laba_dev -c "select * from transactions;"
+```
+
+---
+
 ## :rocket:**API Documentation**
 The API provides **Swagger UI** and **ReDoc** for documentation.
 
