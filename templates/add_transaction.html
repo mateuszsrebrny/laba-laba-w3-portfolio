@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Add Transaction</h2>
+    <form hx-post="/add" hx-target="#transaction-list" hx-swap="beforeend">
+        <label>Amount:</label>
+        <input type="text" name="amount" required class="form-control">
+        
+        <label>Token:</label>
+        <input type="text" name="token" required class="form-control">
+        
+        <button type="submit" class="btn btn-success mt-2">Submit</button>
+    </form>
+
+    <a href="/" class="btn btn-secondary mt-2">Back to Transactions</a>
+{% endblock %}

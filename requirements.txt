@@ -3,3 +3,4 @@ uvicorn
 sqlalchemy 
 aiosqlite 
 jinja2
+python-multipart

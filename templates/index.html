@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Transactions</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Amount</th>
+                <th>Token</th>
+            </tr>
+        </thead>
+        <tbody id="transaction-list">
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.token }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/add" class="btn btn-primary">Add Transaction</a>
+{% endblock %}
