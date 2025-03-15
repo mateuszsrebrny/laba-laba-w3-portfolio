@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Add Transaction</h2>
-    <form hx-post="/add" hx-target="#transaction-list" hx-swap="beforeend">
+    <form hx-post="/add" hx-target="#transaction-list" hx-indicator="#loading" hx-swap="beforeend">
+        <div id="loading" class="htmx-indicator">Submitting...</div>
+        <div id="transaction-list"></div>
         <label>Amount:</label>
         <input type="text" name="amount" required class="form-control">
         
