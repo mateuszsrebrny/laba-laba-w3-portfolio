@@ -7,7 +7,6 @@ WORKDIR /
 # Copy dependencies
 COPY requirements.txt /app/ 
 
-ENV DATABASE_URL=postgresql://ll_dev_user:ll_dev_db_pass@172.17.0.1:5432/laba_laba_dev
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/requirements.txt
 

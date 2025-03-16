@@ -1,4 +1,17 @@
 services:
+  laba-laba-app:
+    build: .
+    container_name: laba-laba-dev-app
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://ll_dev_user:ll_dev_db_pass@postgres/laba_laba_dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+
   postgres:
     image: postgres:16
     container_name: laba-laba-dev-db

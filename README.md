@@ -57,7 +57,25 @@ docker compose run test
 ### Start the app
 
 ```bash 
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+docker compose up --build -d
+```
+
+### Check the logs 
+
+```bash
+docker logs laba-laba-dev-app -f
+```
+
+### Stop the app
+
+Without cleaning db volume:
+```bash
+docker compose down
+```
+
+With cleaning db volume:
+```bash
+docker compose down -v
 ```
 
 ### Select from the db
