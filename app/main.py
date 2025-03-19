@@ -6,7 +6,12 @@ from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from app.models import Transaction, get_db
+
+from app.models import Base, Transaction
+from app.database import SessionLocal, engine, get_db
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.database import Base, engine, SessionLocal
 from sqlalchemy import Column, Integer, Float, String
+from app.database import Base
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -9,13 +9,4 @@ class Transaction(Base):
     amount = Column(Float, nullable=False)
     token = Column(String, nullable=False)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
 
-# Helper function to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
