@@ -26,7 +26,8 @@ jobs:
             const main = 'main';
             const prod = 'production';
 
-            const { data: prs } = await github.pulls.list({
+            // Check for open PR from main → production
+            const { data: prs } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `${context.repo.owner}:${main}`,
@@ -36,7 +37,7 @@ jobs:
 
             let pr;
             if (prs.length === 0) {
-              const created = await github.pulls.create({
+              const { data: created } = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 head: main,
@@ -44,12 +45,12 @@ jobs:
                 title: 'Auto PR: main → production',
                 body: 'Automated squash merge after successful tests.'
               });
-              pr = created.data;
+              pr = created;
             } else {
               pr = prs[0];
             }
 
-            await github.pulls.merge({
+            await github.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pr.number,
@@ -57,3 +58,5 @@ jobs:
             });
 
             console.log(`Squash-merged PR #${pr.number} from main to production`);
+
+
