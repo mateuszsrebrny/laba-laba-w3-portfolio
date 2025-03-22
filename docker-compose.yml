@@ -4,26 +4,27 @@ services:
     container_name: laba-laba-dev-app
     restart: always
     depends_on:
-      - postgres
+      - mysql
     environment:
-      DATABASE_URL: postgresql://ll_dev_user:ll_dev_db_pass@postgres/laba_laba_dev
+      DATABASE_URL: mysql+pymysql://ll_dev_user:ll_dev_db_pass@mysql:3306/ll_dev
     ports:
       - "8000:8000"
     volumes:
       - ./app:/app
 
-  postgres:
-    image: postgres:16
+  mysql:
+    image: mysql:8.0
     container_name: laba-laba-dev-db
     restart: always
     environment:
-      POSTGRES_USER: ll_dev_user
-      POSTGRES_PASSWORD: ll_dev_db_pass
-      POSTGRES_DB: laba_laba_dev
+      MYSQL_ROOT_PASSWORD: ll_dev_db_root_pass
+      MYSQL_DATABASE: ll_dev
+      MYSQL_USER: ll_dev_user
+      MYSQL_PASSWORD: ll_dev_db_pass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:

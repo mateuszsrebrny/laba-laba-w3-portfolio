@@ -7,6 +7,6 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Float, nullable=False)
-    token = Column(String, nullable=False)
+    token = Column(String(8), nullable=False)
 
 
