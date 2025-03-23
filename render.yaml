@@ -1,15 +1,11 @@
-# Exported from Render on 2025-03-23T08:14:09Z
 services:
-- type: web
-  name: laba-laba-w3-app
-  runtime: python
-  repo: https://github.com/mateuszsrebrny/laba-laba-w3-portfolio
-  branch: production
-  plan: free
-  envVars:
-  - key: DATABASE_URL
-    sync: false
-  region: frankfurt
-  buildCommand: pip install -r requirements.txt
-  startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
-version: "1"
+  - type: web
+    name: laba-laba-w3-app
+    env: docker
+    plan: free 
+    branch: production
+    dockerfilePath: ./Dockerfile
+    buildCommand: docker build -t laba-laba-app .
+    envVars:
+      - key: DATABASE_URL
+        sync: false 
