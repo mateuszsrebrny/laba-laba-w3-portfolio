@@ -89,8 +89,8 @@ docker exec -it laba-laba-dev-db psql -U ll_dev_user -d laba_laba_dev -c "select
 ## :rocket:**API Documentation**
 The API provides **Swagger UI** and **ReDoc** for documentation.
 
-- :book:**Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)  
-- :book:**ReDoc UI:** [http://localhost:8000/redoc](http://localhost:8000/redoc)  
+- :book:**Swagger UI:** [http://localhost:10000/docs](http://localhost:10000/docs)  
+- :book:**ReDoc UI:** [http://localhost:10000/redoc](http://localhost:10000/redoc)  
 
 
 ---

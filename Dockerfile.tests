@@ -1,4 +1,4 @@
-FROM laba-laba-app-image 
+FROM laba-laba-app
 
 RUN ls -l
 
