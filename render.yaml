@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: laba-laba-w3-app
+    env: docker
+    plan: free 
+    branch: production
+    dockerfilePath: ./Dockerfile
+    buildCommand: docker build -t laba-laba-app .
+    envVars:
+      - key: DATABASE_URL
+        sync: false 
