@@ -12,8 +12,6 @@ services:
       DATABASE_URL: mysql+pymysql://ll_dev_user:ll_dev_db_pass@mysql:3306/ll_dev
     ports:
       - "10000:10000"
-    volumes:
-      - ./app:/app
 
   mysql:
     image: mysql:8.0
