@@ -31,6 +31,11 @@ function stop_services() {
     docker compose down "$@"
 }
 
+function query_db() {
+    echo "▶ Querying database ... "
+    echo "$@" | mysql -ull_dev_user -pll_dev_db_pass -h127.0.0.1 ll_dev
+}
+
 CMD="$1"
 shift || true
 
@@ -53,10 +58,12 @@ case "$CMD" in
     echo "✅ Tests passed. Starting app and database..."
     start_services
     ;;
+  query)
+    query_db "$@"
+    ;;
   *)
     echo "Usage: $0 {tests|start|stop} [docker compose args]"
     exit 1
     ;;
 esac
-
 
