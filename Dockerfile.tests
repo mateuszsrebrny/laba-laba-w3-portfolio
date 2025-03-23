@@ -1,0 +1,15 @@
+FROM laba-laba-app-image 
+
+RUN ls -l
+
+# Install extra test dependencies
+COPY requirements-tests.txt /
+RUN pip install --no-cache-dir -r ./requirements-tests.txt
+
+COPY tests/ /tests/
+COPY features/ /features/
+COPY pytest.ini /
+
+# Default command
+CMD ["pytest", "tests/"]
+
