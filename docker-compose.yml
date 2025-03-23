@@ -1,6 +1,9 @@
 services:
   laba-laba-app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: laba-laba-app-image
     container_name: laba-laba-dev-app
     restart: always
     depends_on:
