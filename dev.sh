@@ -36,6 +36,11 @@ function query_db() {
     echo "$@" | mysql -ull_dev_user -pll_dev_db_pass -h127.0.0.1 ll_dev
 }
 
+function exec_app() {    
+    echo "▶ Executing command ... "
+    docker exec -it laba-laba-dev-app "$@"
+}
+
 CMD="$1"
 shift || true
 
@@ -60,6 +65,9 @@ case "$CMD" in
     ;;
   query)
     query_db "$@"
+    ;;
+  exec)
+    exec_app "$@"
     ;;
   *)
     echo "Usage: $0 {tests|start|stop} [docker compose args]"
