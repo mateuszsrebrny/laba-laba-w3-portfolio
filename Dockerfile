@@ -16,5 +16,8 @@ COPY app /src/app
 # Expose the port for Uvicorn
 EXPOSE 10000
 
+# Copy the alembic.ini
+COPY alembic.ini /src/alembic.ini
+
 # Run FastAPI with Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
