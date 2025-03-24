@@ -3,6 +3,8 @@ FROM python:3.11
 
 ARG GIT_COMMIT=unknown-docker
 ENV GIT_COMMIT=$GIT_COMMIT
+ARG RENDER_GIT_COMMIT
+ENV RENDER_GIT_COMMIT=$RENDER_GIT_COMMIT
 
 # Set working directory inside the container
 WORKDIR /src/
