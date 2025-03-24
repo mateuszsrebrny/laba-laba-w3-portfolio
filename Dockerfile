@@ -11,7 +11,9 @@ COPY requirements.txt /src/
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY scripts /src/scripts
-COPY commit.txt /src/
+COPY .git /src/.git
+RUN python scripts/write_commit_hash.py
+RUN rm -rf /src/.git
 
 # Copy the FastAPI app
 COPY app /src/app 
@@ -21,6 +23,7 @@ EXPOSE 10000
 
 # Copy the alembic.ini
 COPY alembic.ini /src/alembic.ini
+
 
 # Run FastAPI with Uvicorn
 CMD ["bash", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
