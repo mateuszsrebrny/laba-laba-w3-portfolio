@@ -5,7 +5,7 @@ services:
     plan: free 
     branch: production
     dockerfilePath: ./Dockerfile
-    buildCommand: docker build -t laba-laba-app .
+    buildCommand: python scripts/write_commit_hash.py && docker build -t laba-laba-app .
     envVars:
       - key: DATABASE_URL
         sync: false

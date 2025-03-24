@@ -10,6 +10,9 @@ COPY requirements.txt /src/
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY scripts /src/scripts
+COPY commit.txt /src/
+
 # Copy the FastAPI app
 COPY app /src/app 
 

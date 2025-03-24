@@ -6,6 +6,7 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
+    python scripts/write_commit_hash.py
     docker compose build laba-laba-app 
 }
 

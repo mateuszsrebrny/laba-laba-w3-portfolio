@@ -8,3 +8,4 @@ instance/
 .idea/
 .vscode/
 .venv
+commit.txt

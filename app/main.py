@@ -2,6 +2,8 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import os
+
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -16,16 +18,23 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
+try:
+    with open(os.path.join(os.path.dirname(__file__), "../commit.txt")) as f:
+        GIT_COMMIT = f.read().strip()
+except FileNotFoundError:
+    GIT_COMMIT = "unknown"
+
+
 # Home page - Show transactions
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_db)):
     transactions = db.query(Transaction).all()
-    return templates.TemplateResponse(request, "index.html", {"request": request, "transactions": transactions})
+    return templates.TemplateResponse(request, "index.html", {"request": request, "git_commit": GIT_COMMIT, "transactions": transactions})
 
 # Add transaction form
 @app.get("/add", response_class=HTMLResponse)
 async def add_transaction_page(request: Request):
-    return templates.TemplateResponse(request, "add_transaction.html", {"request": request})
+    return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT})
 
 # Handle transaction submission
 @app.post("/add", response_class=HTMLResponse)
