@@ -8,4 +8,6 @@ services:
     buildCommand: docker build -t laba-laba-app .
     envVars:
       - key: DATABASE_URL
-        sync: false 
+        sync: false
+    startCommand: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 10000"
+

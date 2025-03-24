@@ -20,5 +20,5 @@ EXPOSE 10000
 COPY alembic.ini /src/alembic.ini
 
 # Run FastAPI with Uvicorn
-CMD ["bash", "-c", "alembic stamp head && uvicorn app.main:app --host 0.0.0.0 --port 10000"]
+CMD ["bash", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
 
