@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Make dev.sh executable
-        run: chmod +x ./dev.sh
+        run: chmod +x ./scripts/dev.sh
 
       - name: Run tests
-        run: ./dev.sh tests
+        run: ./scripts/dev.sh tests
