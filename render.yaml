@@ -9,5 +9,5 @@ services:
       - key: DATABASE_URL
         sync: false
     #startCommand: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 10000"
-    dockerCommand: bash -c "alembic stamp head && sleep 20"
+    #dockerCommand: bash -c "alembic stamp head && sleep 20"
 
