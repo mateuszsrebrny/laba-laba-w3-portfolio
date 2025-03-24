@@ -18,12 +18,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
-try:
-    with open(os.path.join(os.path.dirname(__file__), "../commit.txt")) as f:
-        GIT_COMMIT = f.read().strip()
-except FileNotFoundError:
-    GIT_COMMIT = "unknown"
-
+GIT_COMMIT = os.getenv("GIT_COMMIT", "unknown") 
 
 # Home page - Show transactions
 @app.get("/", response_class=HTMLResponse)

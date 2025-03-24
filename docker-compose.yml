@@ -3,6 +3,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}
     image: laba-laba-app
     container_name: laba-laba-dev-app
     restart: always

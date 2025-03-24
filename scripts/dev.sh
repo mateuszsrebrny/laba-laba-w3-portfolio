@@ -6,7 +6,7 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
-    docker compose build laba-laba-app 
+    GIT_COMMIT=$(git rev-parse HEAD) docker compose build laba-laba-app 
 }
 
 function build_tests() {
