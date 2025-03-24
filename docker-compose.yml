@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        GIT_COMMIT: ${GIT_COMMIT:-unknown-compose}
     image: laba-laba-app
     container_name: laba-laba-dev-app
     restart: always
