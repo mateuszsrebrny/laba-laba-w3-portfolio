@@ -22,10 +22,10 @@ GIT_COMMIT = os.getenv("GIT_COMMIT", "unknown")
 
 import os
 
-COMMIT_SHA = (
+GIT_COMMIT = (
     os.environ.get("RENDER_GIT_COMMIT")
     or os.getenv("GIT_COMMIT")
-    or "unknown-main"
+    or "unknown"
 )
 
 # Home page - Show transactions
