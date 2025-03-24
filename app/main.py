@@ -20,6 +20,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 GIT_COMMIT = os.getenv("GIT_COMMIT", "unknown") 
 
+import os
+
+COMMIT_SHA = (
+    os.getenv("RENDER_GIT_COMMIT")
+    or os.getenv("GIT_COMMIT")
+    or "unknown"
+)
+
 # Home page - Show transactions
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_db)):

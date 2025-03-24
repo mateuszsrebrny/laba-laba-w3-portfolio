@@ -1,7 +1,7 @@
 # Use an official Python image
 FROM python:3.11
 
-ARG GIT_COMMIT=$RENDER_GIT_COMMIT
+ARG GIT_COMMIT=unknown
 ENV GIT_COMMIT=$GIT_COMMIT
 
 # Set working directory inside the container
