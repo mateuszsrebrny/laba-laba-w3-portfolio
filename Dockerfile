@@ -25,7 +25,7 @@ ARG GIT_COMMIT=unknown-docker
 ENV GIT_COMMIT=$GIT_COMMIT
 
 # Run FastAPI with Uvicorn
-CMD ["bash", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
+CMD ["bash", "-c", "ls -l && uvicorn app.main:app --host 0.0.0.0 --port 10000"]
 #CMD ["bash", "-c", "alembic stamp head && sleep 20"]
 
 
