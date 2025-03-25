@@ -2,7 +2,7 @@ FROM laba-laba-app
 
 # Install extra test dependencies
 COPY requirements-tests.txt /src/
-RUN pip install --no-cache-dir -r ./requirements-tests.txt
+RUN pip install -r ./requirements-tests.txt
 
 COPY tests/ /src/tests/
 COPY features/ /src/features/
