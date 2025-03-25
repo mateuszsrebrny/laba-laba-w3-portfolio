@@ -25,4 +25,3 @@ COPY alembic /src/alembic/
 # Run FastAPI with Uvicorn
 CMD ["bash", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 10000"]
 
-
