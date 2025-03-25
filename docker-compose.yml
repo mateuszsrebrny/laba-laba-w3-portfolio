@@ -3,6 +3,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-unknown-compose}
     image: laba-laba-app
     container_name: laba-laba-dev-app
     restart: always
@@ -10,7 +12,6 @@ services:
       - mysql
     environment:
       DATABASE_URL: mysql+pymysql://ll_dev_user:ll_dev_db_pass@mysql:3306/ll_dev
-      GIT_COMMIT: ${GIT_COMMIT:-unknown-compose}
     ports:
       - "10000:10000"
     volumes:
