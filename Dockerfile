@@ -22,10 +22,7 @@ EXPOSE 10000
 COPY alembic.ini /src/alembic.ini
 COPY alembic /src/alembic/
 
-ARG GIT_COMMIT=unknown-docker
-ENV GIT_COMMIT=$GIT_COMMIT
-
 # Run FastAPI with Uvicorn
-CMD ["bash", "-c", "alembic stamp head ; sleep 20 ; uvicorn app.main:app --host 0.0.0.0 --port 10000"]
+CMD ["bash", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 10000"]
 
 
