@@ -4,6 +4,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>Timestamp</th>
                 <th>Amount</th>
                 <th>Token</th>
             </tr>
@@ -11,6 +12,7 @@
         <tbody id="transaction-list">
             {% for transaction in transactions %}
             <tr>
+                <td>{{ transaction.timestamp}}</td>
                 <td>{{ transaction.amount }}</td>
                 <td>{{ transaction.token }}</td>
             </tr>

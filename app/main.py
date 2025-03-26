@@ -12,18 +12,22 @@ from sqlalchemy.orm import Session
 from app.models import Base, Transaction
 from app.database import SessionLocal, engine, get_db
 
+from datetime import datetime
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
-GIT_COMMIT = os.getenv("GIT_COMMIT", "unknown") 
+def format_datetime_for_input(dt: datetime) -> str:
+    return dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-import os
+templates.env.filters['datetimeformat'] = format_datetime_for_input
+
 
 GIT_COMMIT = (
-    os.environ.get("RENDER_GIT_COMMIT")
+    os.getenv("RENDER_GIT_COMMIT")
     or os.getenv("GIT_COMMIT")
     or "unknown"
 )
@@ -37,12 +41,13 @@ async def home(request: Request, db: Session = Depends(get_db)):
 # Add transaction form
 @app.get("/add", response_class=HTMLResponse)
 async def add_transaction_page(request: Request):
-    return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT})
+    return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()})
 
 # Handle transaction submission
 @app.post("/add", response_class=HTMLResponse)
-async def add_transaction(amount: float = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
-    new_transaction = Transaction(amount=amount, token=token)
+async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
+    new_transaction = Transaction(timestamp=timestamp, amount=amount, token=token)
     db.add(new_transaction)
     db.commit()
-    return f'<tr><td>{amount}</td><td>{token}</td></tr>'  # HTMX replaces content dynamically
+    return f'<tr><td>{timestamp}</td><td>{amount}</td><td>{token}</td></tr>'  # HTMX replaces content dynamically
+

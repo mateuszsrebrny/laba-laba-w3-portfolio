@@ -37,6 +37,6 @@ def add_transaction(timestamp, token, amount, client, base_payload):
 ))
 def transaction_should_be_visible(timestamp, token, amount, client):
     response = client.get("/")
-    #assert timestamp in response.text
+    assert str(timestamp) in response.text
     assert token in response.text
     assert str(amount) in response.text

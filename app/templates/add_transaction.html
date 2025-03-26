@@ -9,9 +9,29 @@
         
         <label>Token:</label>
         <input type="text" name="token" required class="form-control">
-        
+
+        <label>Timestamp:</label>
+        <input 
+            id="timestamp"
+            type="text" 
+            name="timestamp" 
+            required class="form-control"
+            step="1"
+            value="{{ now|datetimeformat }}"
+        >
+
         <button type="submit" class="btn btn-success mt-2">Submit</button>
     </form>
 
     <a href="/" class="btn btn-secondary mt-2">Back to Transactions</a>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<script>
+	flatpickr("#timestamp", {
+	  enableTime: true,
+	  enableSeconds: true,
+	  time_24hr: true,
+	  dateFormat: "Y-m-d\\TH:i:S",
+	  defaultDate: new Date().toISOString().slice(0, 19)
+	});
+	</script>
 {% endblock %}

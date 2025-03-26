@@ -15,6 +15,9 @@ services:
       - "10000:10000"
     volumes:
       - ./alembic:/src/alembic
+    # uncomment if you don't want alembic to run before uvicorn
+    #command: ["bash", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
+
 
   mysql:
     image: mysql:8.0
