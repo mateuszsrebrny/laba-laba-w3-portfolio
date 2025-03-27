@@ -18,6 +18,9 @@ def api_is_running(client):
 @when(parsers.parse(
     'I add a transaction with timestamp "{timestamp:ti}", token "{token}", amount {amount:F}'
 ))
+@given(parsers.parse(
+    'I add a transaction with timestamp "{timestamp:ti}", token "{token}", amount {amount:F}'
+))
 def add_transaction(timestamp, token, amount, client, base_payload):
     payload = {
         **base_payload,
@@ -40,3 +43,14 @@ def transaction_should_be_visible(timestamp, token, amount, client):
     assert str(timestamp) in response.text
     assert token in response.text
     assert str(amount) in response.text
+
+@when("I try to add the same transaction again")
+def try_to_add_same_transaction_again(client):
+    response = client.post("/add", data=pytest.last_payload)
+    pytest.last_response = response
+
+@then(parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"'))
+def check_error_message(error_code, error_msg):
+    assert pytest.last_response.status_code == error_code
+    response_text = pytest.last_response.text
+    assert error_msg in response_text
