@@ -1,19 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Add Transaction</h2>
-    <div id="error-message" class="text-danger mb-2"></div>
-	<script>
-		document.addEventListener('htmx:responseError', function (event) {
-			const xhr = event.detail.xhr;
-			const errorContainer = document.getElementById('error-message');
-			if (xhr.status === 409) {
-				const errorMessage = JSON.parse(xhr.responseText).error; // Extract error message
-				errorContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
-			} else {
-				errorContainer.innerHTML = `<div class="alert alert-danger">An unknown error occurred.</div>`;
-			}
-		});
-	</script>
+    <div id="error" class="text-danger mb-2"></div>
+
+    <script>
+        function showErrorMessage(xhr) {
+            const errorContainer = document.getElementById('error');
+            let errorMessage = "An unknown error occurred."; 
+
+            if (xhr.status >= 400 && xhr.status < 500) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    // Extract error message from response
+                    errorMessage = response.error || errorMessage; 
+                } catch (e) {
+                    console.error("Failed to parse error response:", e);
+                }
+            }
+
+            // Display the error message
+            errorContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+
+            // Automatically hide the error message after 5 seconds with fade-out effect
+            setTimeout(() => {
+                errorContainer.style.transition = "opacity 1s";
+                errorContainer.style.opacity = "0"; // Fade out
+                setTimeout(() => {
+                    errorContainer.innerHTML = ""; // Clear content after fade-out
+                    errorContainer.style.opacity = "1"; // Reset opacity for future messages
+                }, 1000); // Wait for fade-out duration (1 second)
+            }, 5000); // Adjust timeout duration as needed
+        }
+
+        // HTMX event listener for response errors
+        document.addEventListener('htmx:responseError', function (event) {
+            showErrorMessage(event.detail.xhr);
+        });
+    </script>
 
     <form hx-post="/add" hx-target="#transaction-list" hx-indicator="#loading" hx-swap="beforeend">
 
