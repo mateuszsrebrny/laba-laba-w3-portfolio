@@ -46,7 +46,7 @@ async def add_transaction_page(request: Request):
     return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()})
 
 # Handle transaction submission
-@app.post("/add", response_class=HTMLResponse)
+@app.post("/add", response_class=JSONResponse)
 async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
     try:
     	new_transaction = Transaction(timestamp=timestamp, amount=amount, token=token)
@@ -58,4 +58,4 @@ async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(
             content={"error": f"Transaction with timestamp '{timestamp}' and token '{token}' already exists"},
             status_code=409,
         )
-    return f"<tr><td>{timestamp}</td><td>{amount}</td><td>{token}</td></tr>"
+    return {"status": "success", "message": f"Transaction with timestamp '{timestamp}', and {amount} {token} added"}

@@ -1,44 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Add Transaction</h2>
-    <div id="error" class="text-danger mb-2"></div>
+    <div id="message" class="text-danger mb-2"></div>
 
-    <script>
-        function showErrorMessage(xhr) {
-            const errorContainer = document.getElementById('error');
-            let errorMessage = "An unknown error occurred."; 
-
-            if (xhr.status >= 400 && xhr.status < 500) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    // Extract error message from response
-                    errorMessage = response.error || errorMessage; 
-                } catch (e) {
-                    console.error("Failed to parse error response:", e);
-                }
-            }
-
-            // Display the error message
-            errorContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
-
-            // Automatically hide the error message after 5 seconds with fade-out effect
+	<script>
+    	function showMessage(message, type) {
+        	const messageContainer = document.getElementById('message');
+        	const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        
+            messageContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        
+            // Automatically hide the message after 5 seconds
             setTimeout(() => {
-                errorContainer.style.transition = "opacity 1s";
-                errorContainer.style.opacity = "0"; // Fade out
+                messageContainer.style.transition = "opacity 1s";
+                messageContainer.style.opacity = "0"; // Fade out
                 setTimeout(() => {
-                    errorContainer.innerHTML = ""; // Clear content after fade-out
-                    errorContainer.style.opacity = "1"; // Reset opacity for future messages
+                    messageContainer.innerHTML = ""; // Clear content after fade-out
+                    messageContainer.style.opacity = "1"; // Reset opacity for future messages
                 }, 1000); // Wait for fade-out duration (1 second)
             }, 5000); // Adjust timeout duration as needed
         }
 
-        // HTMX event listener for response errors
+        document.addEventListener('htmx:afterRequest', function (event) {
+            const xhr = event.detail.xhr;
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    showMessage(response.message, 'success');
+                }
+            }
+        });
+
         document.addEventListener('htmx:responseError', function (event) {
-            showErrorMessage(event.detail.xhr);
+            const xhr = event.detail.xhr;
+            let errorMessage = "An unknown error occurred.";
+            if (xhr.status >= 400 && xhr.status < 500) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.error || errorMessage; // Extract error message from response
+                } catch (e) {
+                    console.error("Failed to parse error response:", e);
+                }
+            }
+            showMessage(errorMessage, 'danger');
         });
     </script>
 
-    <form hx-post="/add" hx-target="#transaction-list" hx-indicator="#loading" hx-swap="beforeend">
+
+    <form hx-post="/add" hx-indicator="#loading">
 
 
         <div id="loading" class="htmx-indicator">Submitting...</div>
