@@ -6,7 +6,7 @@ import os
 
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
 def format_datetime_for_input(dt: datetime) -> str:
-    return dt.strftime('%Y-%m-%dT%H:%M:%S')
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 templates.env.filters['datetimeformat'] = format_datetime_for_input
 
@@ -54,9 +54,8 @@ async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(
     	db.commit()
     except IntegrityError:
         db.rollback()
-        return PlainTextResponse(
-            f"<tr><td colspan=3>Transaction with timestamp '{timestamp}' and token '{token}' already exists</td></tr>",
-            status_code=409
+        return JSONResponse(
+            content={"error": f"Transaction with timestamp '{timestamp}' and token '{token}' already exists"},
+            status_code=409,
         )
-    return f'<tr><td>{timestamp}</td><td>{amount}</td><td>{token}</td></tr>'  # HTMX replaces content dynamically
-
+    return f"<tr><td>{timestamp}</td><td>{amount}</td><td>{token}</td></tr>"

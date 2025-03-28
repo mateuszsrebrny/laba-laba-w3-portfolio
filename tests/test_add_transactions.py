@@ -52,5 +52,6 @@ def try_to_add_same_transaction_again(client):
 @then(parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"'))
 def check_error_message(error_code, error_msg):
     assert pytest.last_response.status_code == error_code
-    response_text = pytest.last_response.text
-    assert error_msg in response_text
+    json_body = pytest.last_response.json()
+    assert "error" in json_body
+    assert error_msg in json_body["error"]

@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Add Transaction</h2>
+    <div id="error-message" class="text-danger mb-2"></div>
+	<script>
+		document.addEventListener('htmx:responseError', function (event) {
+			const xhr = event.detail.xhr;
+			const errorContainer = document.getElementById('error-message');
+			if (xhr.status === 409) {
+				const errorMessage = JSON.parse(xhr.responseText).error; // Extract error message
+				errorContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+			} else {
+				errorContainer.innerHTML = `<div class="alert alert-danger">An unknown error occurred.</div>`;
+			}
+		});
+	</script>
+
     <form hx-post="/add" hx-target="#transaction-list" hx-indicator="#loading" hx-swap="beforeend">
+
+
         <div id="loading" class="htmx-indicator">Submitting...</div>
         <div id="transaction-list"></div>
         <label>Amount:</label>
