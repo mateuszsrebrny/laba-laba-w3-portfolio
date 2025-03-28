@@ -55,7 +55,7 @@ async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(
     except IntegrityError:
         db.rollback()
         return PlainTextResponse(
-            f"Transaction with timestamp '{timestamp}' and token '{token}' already exists",
+            f"<tr><td colspan=3>Transaction with timestamp '{timestamp}' and token '{token}' already exists</td></tr>",
             status_code=409
         )
     return f'<tr><td>{timestamp}</td><td>{amount}</td><td>{token}</td></tr>'  # HTMX replaces content dynamically
