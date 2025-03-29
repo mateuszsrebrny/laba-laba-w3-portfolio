@@ -7,6 +7,7 @@
                 <th>Timestamp</th>
                 <th>Amount</th>
                 <th>Token</th>
+                <th>Total USD</th>
             </tr>
         </thead>
         <tbody id="transaction-list">
@@ -15,6 +16,7 @@
                 <td>{{ transaction.timestamp}}</td>
                 <td>{{ transaction.amount }}</td>
                 <td>{{ transaction.token }}</td>
+                <td>{{ transaction.total_usd }}</td>
             </tr>
             {% endfor %}
         </tbody>
