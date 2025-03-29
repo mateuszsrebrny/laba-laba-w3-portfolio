@@ -9,6 +9,7 @@ class Transaction(Base):
     timestamp = Column(DateTime, nullable=False)
     token = Column(String(8), nullable=False)
     amount = Column(Float, nullable=False)
+    total_usd = Column(Float, nullable=False)
 
     __table_args__ = (
         UniqueConstraint("timestamp", "token", name="uq_timestamp_token"),

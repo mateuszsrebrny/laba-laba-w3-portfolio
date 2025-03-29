@@ -47,15 +47,15 @@ async def add_transaction_page(request: Request):
 
 # Handle transaction submission
 @app.post("/add", response_class=JSONResponse)
-async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(...), token: str = Form(...), db: Session = Depends(get_db)):
+async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(...), token: str = Form(...), total_usd: float = Form(...), db: Session = Depends(get_db)):
     try:
-    	new_transaction = Transaction(timestamp=timestamp, amount=amount, token=token)
-    	db.add(new_transaction)
-    	db.commit()
+        new_transaction = Transaction(timestamp=timestamp, amount=amount, token=token, total_usd=total_usd)
+        db.add(new_transaction)
+        db.commit()
     except IntegrityError:
         db.rollback()
         return JSONResponse(
             content={"error": f"Transaction with timestamp '{timestamp}' and token '{token}' already exists"},
             status_code=409,
         )
-    return {"status": "success", "message": f"Transaction with timestamp '{timestamp}', and {amount} {token} added"}
+    return {"status": "success", "message": f"Transaction with timestamp '{timestamp}', and {amount} {token}, and USD {total_usd} added"}
