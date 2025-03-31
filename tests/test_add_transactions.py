@@ -3,36 +3,30 @@ from pytest_bdd import scenarios, given, when, then, parsers
 
 scenarios("add_transaction.feature")
 
-@pytest.fixture
-def base_payload():
-    return {
-    }
-
 @given("the API is running")
 def api_is_running(client):
     response = client.get("/")
     assert response.status_code == 200
 
 @when(parsers.parse(
-    'I add a transaction with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'
+    'I add a transaction with timestamp "{timestamp:ti}", from_token "{from_token}", to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
 ))
-@given(parsers.parse(
-    'I add a transaction with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'
-))
-def add_transaction(timestamp, token, amount, total_usd, client, base_payload):
+def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, client):
     payload = {
-        **base_payload,
-        "timestamp": timestamp,
-        "token": token,
-        "amount": amount,
-        "total_usd": total_usd,
+        "timestamp": str(timestamp),
+        "from_token": from_token,
+        "to_token": to_token,
+        "from_amount": from_amount,
+        "to_amount": to_amount,
     }
-
     pytest.last_payload = payload
-    response = client.post("/add", data=payload)
+    response = client.post("/add", json=payload) 
     pytest.last_response = response
     assert response.status_code == 200
 
+@given(parsers.parse('"{token}" is marked as a stablecoin'))
+def mark_as_stablecoin(token, setup_stablecoin):
+    setup_stablecoin(["DAI"])
 
 @then(parsers.parse(
     'the transaction should be visible with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'

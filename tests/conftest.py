@@ -49,3 +49,14 @@ def client(db):
     yield client
     app.dependency_overrides.clear()
 
+
+@pytest.fixture
+def setup_stablecoin(client):
+    def mark_tokens_as_stablecoins(tokens):
+        for token in tokens:
+            payload = {"token": token, "is_stable": True}
+            response = client.post("/tokens", json=payload)
+            assert response.status_code == 200
+    return mark_tokens_as_stablecoins
+
+
