@@ -25,8 +25,8 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
     assert response.status_code == 200
 
 @given(parsers.parse('"{token}" is marked as a stablecoin'))
-def mark_as_stablecoin(token, setup_stablecoin):
-    setup_stablecoin(["DAI"])
+def mark_as_stablecoin(token, mark_token):
+    mark_token("DAI", is_stable=True)
 
 @then(parsers.parse(
     'the transaction should be visible with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'
@@ -38,6 +38,19 @@ def transaction_should_be_visible(timestamp, token, amount, total_usd, client):
     assert str(amount) in response.text
     assert str(total_usd) in response.text
 
+@given(parsers.parse('neither "{token1}" nor "{token2}" is marked as a stablecoin'))
+def neither_tokens_are_stablecoins(token1, token2, mark_token):
+    # Use the mark_token fixture to mark both tokens as non-stablecoins
+    mark_token(token1, is_stable=False)
+    mark_token(token2, is_stable=False)
+
+@given(parsers.parse('both "{token1}" and "{token2}" are marked as stablecoins'))
+def both_tokens_are_stablecoins(token1, token2, mark_token):
+    # Use the mark_token fixture to mark both tokens as stablecoins
+    mark_token(token1, is_stable=True)
+    mark_token(token2, is_stable=True)
+
+
 @when("I try to add another transaction with the same timestamp and token")
 def try_to_add_same_transaction_again(client):
     last_payload = pytest.last_payload
@@ -48,6 +61,30 @@ def try_to_add_same_transaction_again(client):
     }
     response = client.post("/add", data=payload)
     pytest.last_response = response
+
+
+@when(parsers.parse(
+    'I try to add a transaction with timestamp "{timestamp:ti}", from_token "{from_token}", to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
+))
+def try_add_transaction(timestamp, from_token, to_token, from_amount, to_amount, client):
+    # Prepare the payload for the transaction
+    payload = {
+        "timestamp": str(timestamp),
+        "from_token": from_token,
+        "to_token": to_token,
+        "from_amount": from_amount,
+        "to_amount": to_amount,
+    }
+
+    # Store the payload for later verification
+    pytest.last_payload = payload
+
+    # Send the POST request to the /add endpoint
+    response = client.post("/add", json=payload)
+
+    # Store the response for later verification
+    pytest.last_response = response
+
 
 @then(parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"'))
 def check_error_message(error_code, error_msg):

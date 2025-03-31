@@ -51,12 +51,10 @@ def client(db):
 
 
 @pytest.fixture
-def setup_stablecoin(client):
-    def mark_tokens_as_stablecoins(tokens):
-        for token in tokens:
-            payload = {"token": token, "is_stable": True}
-            response = client.post("/tokens", json=payload)
-            assert response.status_code == 200
-    return mark_tokens_as_stablecoins
-
+def mark_token(client):
+    def _mark_token(token, is_stable):
+        payload = {"token": token, "is_stable": is_stable}
+        response = client.post("/tokens", json=payload)
+        assert response.status_code == 200
+    return _mark_token
 
