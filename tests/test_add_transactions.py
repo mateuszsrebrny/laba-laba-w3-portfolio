@@ -24,7 +24,7 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
 
 @given(parsers.parse('"{token}" is marked as a stablecoin'))
 def mark_as_stablecoin(token, mark_token):
-    mark_token("DAI", is_stable=True)
+    mark_token(token, is_stable=True)
 
 @then(parsers.parse(
     'the transaction should be visible with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'
@@ -86,28 +86,57 @@ def check_error_message(error_code, error_msg):
     assert pytest.last_response.status_code == error_code
     json_body = pytest.last_response.json()
     assert "error" in json_body
-@when('I add another transaction with the same timestamp but different token')
-def add_transaction_with_different_token(client):
+
+
+@when(parsers.parse(
+    'I try to add another transaction with the same timestamp and from_token "{from_token}" and to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
+))
+def try_add_transaction_same_timestamp(from_token, to_token, from_amount, to_amount, client):
+    # Re-use the last timestamp from previous step
     last_payload = pytest.last_payload
     payload = {
-        **last_payload,
-        "token": "w"  + last_payload["token"],
+        "timestamp": last_payload["timestamp"],
+        "from_token": from_token,
+        "to_token": to_token,
+        "from_amount": from_amount,
+        "to_amount": to_amount,
     }
-
-    pytest.last_payload = payload  # Update last payload for reuse
-    response = client.post("/transactions", data=payload)
+    
+    # Store for later verification
+    pytest.last_payload = payload
+    
+    # This should fail with 409 Conflict
+    response = client.post("/transactions", json=payload)
     pytest.last_response = response
-    assert response.status_code == 200
+    # Don't assert here - the calling test will verify the status code
 
 
-@then(parsers.parse(
-    'the second transaction should be visible'
+@when(parsers.parse(
+    'I add another transaction with the same timestamp but from_token "{from_token}" and to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
 ))
-def second_transaction_should_be_visible(client):
+def add_transaction_different_token_same_timestamp(from_token, to_token, from_amount, to_amount, client):
+    # Re-use the last timestamp
+    last_payload = pytest.last_payload
+    payload = {
+        "timestamp": last_payload["timestamp"],
+        "from_token": from_token,
+        "to_token": to_token,
+        "from_amount": from_amount,
+        "to_amount": to_amount,
+    }
+    
+    # This should succeed
+    response = client.post("/transactions", json=payload)
+    pytest.last_response = response
+    assert response.status_code == 200  # This should work since it's a different token
+
+
+@then("the second transactions should be recorded successfully in the system")
+def second_transaction_should_be_recorded(client):
     last_payload = pytest.last_payload
     response = client.get("/")
     assert str(last_payload["timestamp"]) in response.text
-    assert last_payload["token"] in response.text
-    assert str(last_payload["amount"]) in response.text
-    assert str(last_payload["total_usd"]) in response.text
+    assert last_payload["from_token"] in response.text
+    assert str(last_payload["from_amount"]) in response.text
+    assert str(last_payload["to_amount"]) in response.text
 

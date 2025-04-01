@@ -162,7 +162,7 @@ async def get_transaction_data(request: Request) -> TransactionCreate:
         if "application/json" in content_type:
             # Handle JSON data
             data = await request.json()
-            return TransactionCreate.parse_obj(data)
+            return TransactionCreate.model_validate(data)
         else:
             # Handle form data
             form = await request.form()

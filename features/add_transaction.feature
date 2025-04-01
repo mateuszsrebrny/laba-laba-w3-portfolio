@@ -37,8 +37,8 @@ Feature: Adding transactions
     Given the API is running
     And "BTC" is marked as a non-stablecoin
     And "DAI" is marked as a stablecoin
-    And I add a transaction with timestamp "2025-03-30 13:00:00", from_token "BTC", to_token "DAI", from_amount "0.4", and to_amount "-10000.0"
-    When I try to add another transaction with the same timestamp and from_token "BTC" and to_token "DAI", from_amount "0.5", and to_amount "-15000.0"
+    And I add a transaction with timestamp "2025-03-30 13:00:00", from_token "BTC", to_token "DAI", from_amount "0.4", and to_amount "10000.0"
+    When I try to add another transaction with the same timestamp and from_token "BTC" and to_token "DAI", from_amount "0.5", and to_amount "15000.0"
     Then I should get an error with code 409 saying "'BTC' already has a transaction at '2025-03-30 13:00:00'"
 
   Scenario: Allowing transactions with the same timestamp but different non-stablecoins
@@ -46,7 +46,7 @@ Feature: Adding transactions
     And "BTC" is marked as a non-stablecoin
     And "ETH" is marked as a non-stablecoin
     And "DAI" is marked as a stablecoin
-    And I add a transaction with timestamp "2025-03-30 14:00:00", from_token "BTC", to_token "DAI", from_amount "1.0", and to_amount "-30000.0"
-    When I add another transaction with the same timestamp but from_token "ETH" and to_token "DAI", from_amount "1.0", and to_amount "-30000.0"
-    Then both transactions should be recorded successfully in the system
+    And I add a transaction with timestamp "2025-03-30 14:00:00", from_token "BTC", to_token "DAI", from_amount "1.0", and to_amount "30000.0"
+    When I add another transaction with the same timestamp but from_token "ETH" and to_token "DAI", from_amount "1.0", and to_amount "30000.0"
+    Then the second transactions should be recorded successfully in the system
 
