@@ -3,11 +3,6 @@ from pytest_bdd import scenarios, given, when, then, parsers
 
 scenarios("add_transaction.feature")
 
-@given("the API is running")
-def api_is_running(client):
-    response = client.get("/")
-    assert response.status_code == 200
-
 @given(parsers.parse(
     'I add a transaction with timestamp "{timestamp:ti}", from_token "{from_token}", to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
 ))
