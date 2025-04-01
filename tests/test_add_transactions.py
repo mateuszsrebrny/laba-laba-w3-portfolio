@@ -8,6 +8,9 @@ def api_is_running(client):
     response = client.get("/")
     assert response.status_code == 200
 
+@given(parsers.parse(
+    'I add a transaction with timestamp "{timestamp:ti}", from_token "{from_token}", to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
+))
 @when(parsers.parse(
     'I add a transaction with timestamp "{timestamp:ti}", from_token "{from_token}", to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'
 ))
@@ -38,17 +41,14 @@ def transaction_should_be_visible(timestamp, token, amount, total_usd, client):
     assert str(amount) in response.text
     assert str(total_usd) in response.text
 
-@given(parsers.parse('neither "{token1}" nor "{token2}" is marked as a stablecoin'))
-def neither_tokens_are_stablecoins(token1, token2, mark_token):
-    # Use the mark_token fixture to mark both tokens as non-stablecoins
-    mark_token(token1, is_stable=False)
-    mark_token(token2, is_stable=False)
+@given(parsers.parse('"{token}" is marked as a non-stablecoin'))
+def mark_token_as_non_stablecoin(token, mark_token):
+    mark_token(token, is_stable=False)
 
-@given(parsers.parse('both "{token1}" and "{token2}" are marked as stablecoins'))
-def both_tokens_are_stablecoins(token1, token2, mark_token):
-    # Use the mark_token fixture to mark both tokens as stablecoins
-    mark_token(token1, is_stable=True)
-    mark_token(token2, is_stable=True)
+@given(parsers.parse('"{token}" is not marked in any way'))
+def token_is_not_marked(token):
+    # No action needed since the database starts empty for each test
+    pass
 
 
 @when("I try to add another transaction with the same timestamp and token")
