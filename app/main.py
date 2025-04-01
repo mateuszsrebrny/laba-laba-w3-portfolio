@@ -243,3 +243,23 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
         )
     return {"name": token.name, "is_stable": token.is_stable}
 
+# Token management UI
+@app.get("/tokens", response_class=HTMLResponse)
+async def tokens_page(request: Request, db: Session = Depends(get_db)):
+    """Render the tokens management page."""
+    tokens = db.query(Token).all()
+    
+    # Check if this is an HTMX request for just the token list
+    if request.headers.get("HX-Request") == "true":
+        return templates.TemplateResponse(
+            request, 
+            "tokens_list.html", 
+            {"request": request, "tokens": tokens}
+        )
+    
+    # Full page render
+    return templates.TemplateResponse(
+        request, 
+        "tokens.html", 
+        {"request": request, "git_commit": GIT_COMMIT, "tokens": tokens}
+    )
