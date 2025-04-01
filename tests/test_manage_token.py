@@ -1,7 +1,7 @@
 from pytest_bdd import given, when, then, parsers, scenarios
 import pytest
 
-scenarios("token_management.feature")
+scenarios("manage_token.feature")
 
 # Reusable fixture for marking tokens
 @pytest.fixture
