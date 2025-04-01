@@ -18,7 +18,7 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
         "to_amount": to_amount,
     }
     pytest.last_payload = payload
-    response = client.post("/add", json=payload) 
+    response = client.post("/transactions", json=payload) 
     pytest.last_response = response
     assert response.status_code == 200
 
@@ -54,7 +54,7 @@ def try_to_add_same_transaction_again(client):
         "amount": last_payload["amount"] + 1,
         "total_usd": last_payload["total_usd"] + 1,
     }
-    response = client.post("/add", data=payload)
+    response = client.post("/transactions", data=payload)
     pytest.last_response = response
 
 
@@ -74,8 +74,8 @@ def try_add_transaction(timestamp, from_token, to_token, from_amount, to_amount,
     # Store the payload for later verification
     pytest.last_payload = payload
 
-    # Send the POST request to the /add endpoint
-    response = client.post("/add", json=payload)
+    # Send the POST request to the /transactions endpoint
+    response = client.post("/transactions", json=payload)
 
     # Store the response for later verification
     pytest.last_response = response
@@ -95,7 +95,7 @@ def add_transaction_with_different_token(client):
     }
 
     pytest.last_payload = payload  # Update last payload for reuse
-    response = client.post("/add", data=payload)
+    response = client.post("/transactions", data=payload)
     pytest.last_response = response
     assert response.status_code == 200
 

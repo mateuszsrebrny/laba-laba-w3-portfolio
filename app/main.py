@@ -24,7 +24,7 @@ class TokenCreate(BaseModel):
     is_stable: bool
 
 class TransactionCreate(BaseModel):
-    timestamp: str
+    timestamp: datetime
     from_token: str
     to_token: str
     from_amount: float
@@ -59,20 +59,156 @@ async def home(request: Request, db: Session = Depends(get_db)):
 async def add_transaction_page(request: Request):
     return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()})
 
-# Handle transaction submission
-@app.post("/add", response_class=JSONResponse)
-async def add_transaction(timestamp: datetime = Form(...), amount: float = Form(...), token: str = Form(...), total_usd: float = Form(...), db: Session = Depends(get_db)):
+def process_add_transaction(
+    timestamp: datetime,
+    from_token: str,
+    to_token: str, 
+    from_amount: float, 
+    to_amount: float,
+    db: Session
+):
+    """Process a transaction between two tokens."""
+    # Validate that tokens exist and get their stability status
+    from_token_obj = db.query(Token).filter(Token.name == from_token).first()
+    to_token_obj = db.query(Token).filter(Token.name == to_token).first()
+    
+    # Check if both tokens exist
+    if not from_token_obj:
+        return JSONResponse(
+            content={"error": f"'{from_token}' is not recognized. Please add it first."},
+            status_code=400,
+        )
+    if not to_token_obj:
+        return JSONResponse(
+            content={"error": f"'{to_token}' is not recognized. Please add it first."},
+            status_code=400,
+        )
+    
+    # Check if one and only one token is a stablecoin
+    if from_token_obj.is_stable and to_token_obj.is_stable:
+        return JSONResponse(
+            content={"error": "Both tokens cannot be stablecoins"},
+            status_code=400,
+        )
+    if not from_token_obj.is_stable and not to_token_obj.is_stable:
+        return JSONResponse(
+            content={"error": "One of the tokens must be a stablecoin"},
+            status_code=400,
+        )
+    
+    # Determine which is the stablecoin and which is the non-stablecoin
+    if from_token_obj.is_stable:
+        stablecoin = from_token
+        non_stablecoin = to_token
+        stablecoin_amount = from_amount
+        non_stablecoin_amount = to_amount
+    else:
+        stablecoin = to_token
+        non_stablecoin = from_token
+        stablecoin_amount = to_amount
+        non_stablecoin_amount = from_amount
+    
+    # Determine if it's a buy or sell of the non-stablecoin
+    if from_token_obj.is_stable:
+        # Buying non-stablecoin with stablecoin
+        final_amount = non_stablecoin_amount  # Positive for buy
+        final_usd = stablecoin_amount  # Positive USD amount
+    else:
+        # Selling non-stablecoin for stablecoin
+        final_amount = -non_stablecoin_amount  # Negative for sell
+        final_usd = -stablecoin_amount  # Negative USD amount
+    
+    # Create and save the transaction
     try:
-        new_transaction = Transaction(timestamp=timestamp, amount=amount, token=token, total_usd=total_usd)
+        new_transaction = Transaction(
+            timestamp=timestamp,
+            token=non_stablecoin,
+            amount=final_amount,
+            stable_coin=stablecoin,
+            total_usd=final_usd
+        )
         db.add(new_transaction)
         db.commit()
     except IntegrityError:
         db.rollback()
         return JSONResponse(
-            content={"error": f"Transaction with timestamp '{timestamp}' and token '{token}' already exists"},
+            content={"error": f"'{non_stablecoin}' already has a transaction at '{timestamp}'"},
             status_code=409,
         )
-    return {"status": "success", "message": f"Transaction with timestamp '{timestamp}', and {amount} {token}, and USD {total_usd} added"}
+    
+    return {
+        "status": "success", 
+        "message": f"Transaction with timestamp '{timestamp}', token '{non_stablecoin}', amount '{final_amount}', stable_coin '{stablecoin}', and total_usd '{final_usd}' added"
+    }
+
+from datetime import datetime
+from fastapi import Depends, HTTPException, Request
+from pydantic import BaseModel
+
+# Pydantic model for transaction validation
+class TransactionCreate(BaseModel):
+    timestamp: datetime
+    from_token: str
+    to_token: str
+    from_amount: float
+    to_amount: float
+
+# Dependency for data extraction
+async def get_transaction_data(request: Request) -> TransactionCreate:
+    """Extract transaction data from either JSON or form data based on content type."""
+    content_type = request.headers.get("Content-Type", "")
+    
+    try:
+        if "application/json" in content_type:
+            # Handle JSON data
+            data = await request.json()
+            return TransactionCreate.parse_obj(data)
+        else:
+            # Handle form data
+            form = await request.form()
+            
+            # Parse timestamp from string
+            try:
+                timestamp_str = form.get("timestamp")
+                timestamp = datetime.fromisoformat(timestamp_str)
+            except (ValueError, AttributeError):
+                raise HTTPException(status_code=400, detail="Invalid timestamp format")
+            
+            # Extract and convert other fields
+            try:
+                return TransactionCreate(
+                    timestamp=timestamp,
+                    from_token=form.get("from_token"),
+                    to_token=form.get("to_token"),
+                    from_amount=float(form.get("from_amount")),
+                    to_amount=float(form.get("to_amount"))
+                )
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Invalid form data"
+                )
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+
+# Single unified endpoint
+@app.post("/transactions", response_class=JSONResponse)
+async def add_transaction(
+    transaction_data: TransactionCreate = Depends(get_transaction_data),
+    db: Session = Depends(get_db)
+):
+    """Add a transaction from either JSON or form data."""
+    return process_add_transaction(
+        timestamp=transaction_data.timestamp,
+        from_token=transaction_data.from_token,
+        to_token=transaction_data.to_token,
+        from_amount=transaction_data.from_amount,
+        to_amount=transaction_data.to_amount,
+        db=db
+    )
+
 
 # Token management endpoints
 @app.post("/tokens", response_class=JSONResponse)
