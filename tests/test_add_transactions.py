@@ -26,15 +26,21 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
 def mark_as_stablecoin(token, mark_token):
     mark_token(token, is_stable=True)
 
-@then(parsers.parse(
-    'the transaction should be visible with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}" and total_usd "{total_usd:f}"'
-))
-def transaction_should_be_visible(timestamp, token, amount, total_usd, client):
+
+@then(parsers.parse('the transaction should be recorded with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}", stable_coin "{stable_coin}", and total_usd "{total_usd:f}"'))
+def verify_transaction_recorded(timestamp, token, amount, stable_coin, total_usd, client, db):
+    """Verify that a transaction with the specified details is shown on the list."""
+    
     response = client.get("/")
-    assert str(timestamp) in response.text
-    assert token in response.text
-    assert str(amount) in response.text
-    assert str(total_usd) in response.text
+    assert response.status_code == 200
+    response_text = response.text
+    
+    # Check that transaction details appear in the response
+    assert str(timestamp) in response_text, f"Timestamp {timestamp} not found in response"
+    assert token in response_text, f"Token {token} not found in response"
+    assert str(amount) in response_text, f"Amount {amount} not found in response"
+    assert str(total_usd) in response_text, f"Total USD {total_usd} not found in response"
+
 
 @given(parsers.parse('"{token}" is marked as a non-stablecoin'))
 def mark_token_as_non_stablecoin(token, mark_token):

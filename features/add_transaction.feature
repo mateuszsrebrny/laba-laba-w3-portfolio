@@ -2,12 +2,14 @@ Feature: Adding transactions
 
   Scenario: Adding a sell BTC to DAI transaction
     Given the API is running
+    And "BTC" is marked as a non-stablecoin
     And "DAI" is marked as a stablecoin
     When I add a transaction with timestamp "2025-03-30 10:00:00", from_token "BTC", to_token "DAI", from_amount "0.5", and to_amount "15000.0"
     Then the transaction should be recorded with timestamp "2025-03-30 10:00:00", token "BTC", amount "-0.5", stable_coin "DAI", and total_usd "-15000.0"
 
   Scenario: Adding a buy BTC with DAI transaction
     Given the API is running
+    And "BTC" is marked as a non-stablecoin
     And "DAI" is marked as a stablecoin
     When I add a transaction with timestamp "2025-03-30 11:00:00", from_token "DAI", to_token "BTC", from_amount "15000.0", and to_amount "0.5"
     Then the transaction should be recorded with timestamp "2025-03-30 11:00:00", token "BTC", amount "0.5", stable_coin "DAI", and total_usd "15000.0"
