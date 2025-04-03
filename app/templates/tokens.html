@@ -87,7 +87,7 @@
             <div class="card">
                 <div class="card-header">Registered Tokens</div>
                 <div class="card-body">
-                    <div id="token-list" hx-get="/tokens" hx-trigger="load">
+                    <div id="token-list" hx-get="/tokens" hx-trigger="load, tokenAdded from:body">
                         <div class="text-center">
                             <div class="spinner-border" role="status">
                                 <span class="visually-hidden">Loading...</span>
