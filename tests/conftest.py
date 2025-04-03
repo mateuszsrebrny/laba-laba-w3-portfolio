@@ -17,6 +17,8 @@ from app.models import Base
 from app.main import app
 from fastapi.testclient import TestClient
 
+from pytest_bdd import given
+
 # Create a test database engine
 test_engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
@@ -49,3 +51,18 @@ def client(db):
     yield client
     app.dependency_overrides.clear()
 
+
+@pytest.fixture
+def mark_token(client):
+    def _mark_token(token, is_stable):
+        payload = {"token": token, "is_stable": is_stable}
+        response = client.post("/tokens", json=payload)
+        assert response.status_code == 200
+    return _mark_token
+
+
+
+@given("the API is running")
+def api_is_running(client):
+    response = client.get("/")
+    assert response.status_code == 200

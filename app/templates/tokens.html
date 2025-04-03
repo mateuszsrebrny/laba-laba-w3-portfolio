@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Manage Tokens</h2>
+    <div id="message" class="text-danger mb-2"></div>
+
+    <script>
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        
+            messageContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+        
+            setTimeout(() => {
+                messageContainer.style.transition = "opacity 1s";
+                messageContainer.style.opacity = "0";
+                setTimeout(() => {
+                    messageContainer.innerHTML = "";
+                    messageContainer.style.opacity = "1";
+                }, 1000);
+            }, 5000);
+        }
+
+        document.addEventListener('htmx:afterRequest', function (event) {
+            const xhr = event.detail.xhr;
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    showMessage(response.message, 'success');
+                    // Refresh token list
+                    document.getElementById('token-list').setAttribute('hx-get', '/tokens');
+                    document.getElementById('token-list').setAttribute('hx-trigger', 'load');
+                }
+            }
+        });
+
+        document.addEventListener('htmx:responseError', function (event) {
+            const xhr = event.detail.xhr;
+            let errorMessage = "An unknown error occurred.";
+            if (xhr.status >= 400 && xhr.status < 500) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.error || errorMessage;
+                } catch (e) {
+                    console.error("Failed to parse error response:", e);
+                }
+            }
+            showMessage(errorMessage, 'danger');
+        });
+    </script>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Add New Token</div>
+                <div class="card-body">
+                    <form hx-post="/tokens" hx-indicator="#loading">
+                        <div id="loading" class="htmx-indicator">Submitting...</div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Token Symbol:</label>
+                            <input type="text" name="token" required class="form-control" placeholder="e.g. BTC, ETH, DAI">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Token Type:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_stable" id="stablecoin" value="true">
+                                <label class="form-check-label" for="stablecoin">
+                                    Stablecoin (e.g., DAI, USDC)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_stable" id="non-stablecoin" value="false" checked>
+                                <label class="form-check-label" for="non-stablecoin">
+                                    Non-stablecoin (e.g., BTC, ETH)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add Token</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Registered Tokens</div>
+                <div class="card-body">
+                    <div id="token-list" hx-get="/tokens" hx-trigger="load, tokenAdded from:body">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="/" class="btn btn-secondary">Back to Transactions</a>
+    </div>
+{% endblock %}
+

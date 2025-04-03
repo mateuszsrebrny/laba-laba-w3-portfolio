@@ -7,6 +7,7 @@
                 <th>Timestamp</th>
                 <th>Amount</th>
                 <th>Token</th>
+                <th>Stablecoin</th>
                 <th>Total USD</th>
             </tr>
         </thead>
@@ -16,11 +17,16 @@
                 <td>{{ transaction.timestamp}}</td>
                 <td>{{ transaction.amount }}</td>
                 <td>{{ transaction.token }}</td>
+                <td>{{ transaction.stable_coin }}</td>
                 <td>{{ transaction.total_usd }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <a href="/add" class="btn btn-primary">Add Transaction</a>
+    <div class="mt-3 mb-3">
+        <a href="/add" class="btn btn-primary">Add Transaction</a>
+        <a href="/tokens" class="btn btn-secondary">Manage Tokens</a>
+    </div>
 {% endblock %}
+

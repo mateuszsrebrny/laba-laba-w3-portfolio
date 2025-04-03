@@ -1,0 +1,29 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Token</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for token in tokens %}
+        <tr>
+            <td>{{ token.name }}</td>
+            <td>
+                {% if token.is_stable %}
+                <span class="badge bg-success">Stablecoin</span>
+                {% else %}
+                <span class="badge bg-primary">Non-stablecoin</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not tokens %}
+<div class="alert alert-warning">
+    No tokens registered yet. Add your first token using the form.
+</div>
+{% endif %}
+
