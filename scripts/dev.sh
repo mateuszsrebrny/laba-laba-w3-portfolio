@@ -18,7 +18,10 @@ function run_tests() {
     build_app
     build_tests
     echo "▶ Running tests..."
-    docker run --rm --tty "$TEST_IMAGE_NAME"
+    docker run --rm --tty \
+        -v "$(pwd)/tests:/src/tests" \
+        -v "$(pwd)/features:/src/features" \
+        "$TEST_IMAGE_NAME"
 }
 
 function start_services() {
@@ -36,7 +39,7 @@ function query_db() {
     echo "$@" | mysql -ull_dev_user -pll_dev_db_pass -h127.0.0.1 ll_dev
 }
 
-function exec_app() {    
+function exec_app() {
     echo "▶ Executing command ... "
     docker exec -it laba-laba-dev-app "$@"
 }

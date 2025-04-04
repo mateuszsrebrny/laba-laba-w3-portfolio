@@ -10,6 +10,7 @@ RUN pip install -r requirements.txt
 COPY alembic.ini /src/alembic.ini
 COPY scripts /src/scripts
 
+# will be overlaid for dev
 COPY alembic /src/alembic/
 COPY app /src/app
 
