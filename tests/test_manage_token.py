@@ -1,5 +1,5 @@
-from pytest_bdd import given, when, then, parsers, scenarios
 import pytest
+from pytest_bdd import given, parsers, scenarios, then, when
 
 scenarios("manage_token.feature")
 

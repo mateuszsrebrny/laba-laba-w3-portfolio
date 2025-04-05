@@ -1,12 +1,6 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    Float,
-    String,
-    DateTime,
-    UniqueConstraint,
-    Boolean,
-)
+from sqlalchemy import (Boolean, Column, DateTime, Float, Integer, String,
+                        UniqueConstraint)
+
 from app.database import Base
 
 

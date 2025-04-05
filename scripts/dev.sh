@@ -47,6 +47,11 @@ function run_fix() {
     run_tests ruff check --fix app tests features
 }
 
+function run_isort() {
+    echo "▶ Running isort..."
+    run_tests isort app tests features
+}
+
 function start_services() {
     echo "▶ Starting app and database..."
     GIT_COMMIT=$(git rev-parse HEAD) docker compose up -d "$@"
@@ -100,6 +105,9 @@ case "$CMD" in
     ;;
   lint)
     run_lint
+    ;;
+  isort)
+    run_isort
     ;;
   fix)
     run_fix
