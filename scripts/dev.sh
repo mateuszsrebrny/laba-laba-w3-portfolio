@@ -34,7 +34,7 @@ function run_tests() {
 
 function run_format() {
     echo "▶ Running formatter..."
-    run_tests black app tests features
+    run_tests black app tests features alembic 
 }
 
 function run_lint() {
