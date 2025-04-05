@@ -4,9 +4,9 @@ FROM laba-laba-app
 COPY requirements-tests.txt /src/
 RUN pip install -r ./requirements-tests.txt
 
-COPY tests/ /src/tests/
-COPY features/ /src/features/
 COPY pytest.ini /src/
+
+# features/ and tests/ will be overlain in the dev.sh script
 
 # Default command
 CMD ["pytest", "tests/"]
