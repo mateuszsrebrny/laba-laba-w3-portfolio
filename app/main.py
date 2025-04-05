@@ -4,9 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-import json
 
-from fastapi import FastAPI, Request, Form, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from starlette.types import ASGIApp
@@ -16,11 +15,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Base, Transaction, Token
-from app.database import SessionLocal, engine, get_db
+from app.database import engine, get_db
 
 from datetime import datetime
 
-from typing import Optional
 from pydantic import BaseModel
 
 
