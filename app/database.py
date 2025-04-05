@@ -7,15 +7,15 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL env var not set")
 
 engine = create_engine(
-    DATABASE_URL, 
+    DATABASE_URL,
     connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
     pool_pre_ping=True,
-
 )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 Base = declarative_base()
+
 
 # Helper function to get DB session
 def get_db():

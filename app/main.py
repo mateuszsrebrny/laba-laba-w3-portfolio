@@ -1,5 +1,6 @@
 # Load environment variables before anything else
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import os
@@ -22,9 +23,11 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
+
 class TokenCreate(BaseModel):
     token: str
     is_stable: bool
+
 
 class TransactionCreate(BaseModel):
     timestamp: datetime
@@ -33,23 +36,22 @@ class TransactionCreate(BaseModel):
     from_amount: float
     to_amount: float
 
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
+
 def format_datetime_for_input(dt: datetime) -> str:
-    return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-templates.env.filters['datetimeformat'] = format_datetime_for_input
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
-GIT_COMMIT = (
-    os.getenv("RENDER_GIT_COMMIT")
-    or os.getenv("GIT_COMMIT")
-    or "unknown"
-)
+templates.env.filters["datetimeformat"] = format_datetime_for_input
+
+
+GIT_COMMIT = os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "unknown"
 
 
 class FormDataMiddleware(BaseHTTPMiddleware):
@@ -62,7 +64,10 @@ class FormDataMiddleware(BaseHTTPMiddleware):
             content_type = request.headers.get("Content-Type", "")
 
             # Handle form data submissions
-            if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+            if (
+                "application/x-www-form-urlencoded" in content_type
+                or "multipart/form-data" in content_type
+            ):
                 try:
                     # Get form data
                     form_data = await request.form()
@@ -70,7 +75,9 @@ class FormDataMiddleware(BaseHTTPMiddleware):
 
                     # Process boolean values (convert from strings)
                     if "is_stable" in form_dict:
-                        form_dict["is_stable"] = form_dict["is_stable"].lower() == "true"
+                        form_dict["is_stable"] = (
+                            form_dict["is_stable"].lower() == "true"
+                        )
 
                     # Save the processed data for later use
                     request.state.form_data = form_dict
@@ -81,6 +88,7 @@ class FormDataMiddleware(BaseHTTPMiddleware):
         # Continue with normal request processing
         return await call_next(request)
 
+
 # Register the middleware
 app.add_middleware(FormDataMiddleware)
 
@@ -89,12 +97,22 @@ app.add_middleware(FormDataMiddleware)
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_db)):
     transactions = db.query(Transaction).all()
-    return templates.TemplateResponse(request, "index.html", {"request": request, "git_commit": GIT_COMMIT, "transactions": transactions})
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        {"request": request, "git_commit": GIT_COMMIT, "transactions": transactions},
+    )
+
 
 # Add transaction form
 @app.get("/add", response_class=HTMLResponse)
 async def add_transaction_page(request: Request):
-    return templates.TemplateResponse(request, "add_transaction.html", {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()})
+    return templates.TemplateResponse(
+        request,
+        "add_transaction.html",
+        {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()},
+    )
+
 
 def process_add_transaction(
     timestamp: datetime,
@@ -102,7 +120,7 @@ def process_add_transaction(
     to_token: str,
     from_amount: float,
     to_amount: float,
-    db: Session
+    db: Session,
 ):
     """Process a transaction between two tokens."""
     # Validate that tokens exist and get their stability status
@@ -112,7 +130,9 @@ def process_add_transaction(
     # Check if both tokens exist
     if not from_token_obj:
         return JSONResponse(
-            content={"error": f"'{from_token}' is not recognized. Please add it first."},
+            content={
+                "error": f"'{from_token}' is not recognized. Please add it first."
+            },
             status_code=400,
         )
     if not to_token_obj:
@@ -162,21 +182,24 @@ def process_add_transaction(
             token=non_stablecoin,
             amount=final_amount,
             stable_coin=stablecoin,
-            total_usd=final_usd
+            total_usd=final_usd,
         )
         db.add(new_transaction)
         db.commit()
     except IntegrityError:
         db.rollback()
         return JSONResponse(
-            content={"error": f"'{non_stablecoin}' already has a transaction at '{timestamp}'"},
+            content={
+                "error": f"'{non_stablecoin}' already has a transaction at '{timestamp}'"
+            },
             status_code=409,
         )
 
     return {
         "status": "success",
-        "message": f"Transaction with timestamp '{timestamp}', token '{non_stablecoin}', amount '{final_amount}', stable_coin '{stablecoin}', and total_usd '{final_usd}' added"
+        "message": f"Transaction with timestamp '{timestamp}', token '{non_stablecoin}', amount '{final_amount}', stable_coin '{stablecoin}', and total_usd '{final_usd}' added",
     }
+
 
 # Dependency for data extraction
 async def get_transaction_data(request: Request) -> TransactionCreate:
@@ -206,23 +229,23 @@ async def get_transaction_data(request: Request) -> TransactionCreate:
                     from_token=form.get("from_token"),
                     to_token=form.get("to_token"),
                     from_amount=float(form.get("from_amount")),
-                    to_amount=float(form.get("to_amount"))
+                    to_amount=float(form.get("to_amount")),
                 )
             except (ValueError, TypeError):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Invalid form data"
-                )
+                raise HTTPException(status_code=400, detail="Invalid form data")
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Error processing request: {str(e)}"
+        )
+
 
 # Single unified endpoint
 @app.post("/transactions", response_class=JSONResponse)
 async def add_transaction(
     transaction_data: TransactionCreate = Depends(get_transaction_data),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add a transaction from either JSON or form data."""
     return process_add_transaction(
@@ -231,7 +254,7 @@ async def add_transaction(
         to_token=transaction_data.to_token,
         from_amount=transaction_data.from_amount,
         to_amount=transaction_data.to_amount,
-        db=db
+        db=db,
     )
 
 
@@ -240,7 +263,7 @@ async def add_transaction(
 async def add_token(
     request: Request,
     token_data: TokenCreate = None,  # For JSON payload
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add a new token - handles both JSON and form data."""
     try:
@@ -249,13 +272,14 @@ async def add_token(
             # Create a Pydantic model from the form data
             data = request.state.form_data
             if not token_data:
-                token_data = TokenCreate(token=data.get("token"), is_stable=data.get("is_stable"))
+                token_data = TokenCreate(
+                    token=data.get("token"), is_stable=data.get("is_stable")
+                )
 
         # Return error if we don't have token data
         if not token_data:
             return JSONResponse(
-                content={"error": "No valid token data received"},
-                status_code=400
+                content={"error": "No valid token data received"}, status_code=400
             )
 
         # Extract data from the Pydantic model
@@ -266,9 +290,13 @@ async def add_token(
         existing_token = db.query(Token).filter(Token.name == token).first()
         if existing_token:
             if existing_token.is_stable != is_stable:
-                stability_type = "stablecoin" if existing_token.is_stable else "non-stablecoin"
+                stability_type = (
+                    "stablecoin" if existing_token.is_stable else "non-stablecoin"
+                )
                 return JSONResponse(
-                    content={"error": f"'{token}' is already marked as a {stability_type}."},
+                    content={
+                        "error": f"'{token}' is already marked as a {stability_type}."
+                    },
                     status_code=409,
                 )
             return {"status": "success", "message": f"Token '{token}' already exists"}
@@ -281,14 +309,13 @@ async def add_token(
         return JSONResponse(
             content={
                 "status": "success",
-                "message": f"Token '{token}' marked as {'stablecoin' if is_stable else 'non-stablecoin'}"
+                "message": f"Token '{token}' marked as {'stablecoin' if is_stable else 'non-stablecoin'}",
             },
-            headers={"HX-Trigger": "tokenAdded"}
+            headers={"HX-Trigger": "tokenAdded"},
         )
     except Exception as e:
         return JSONResponse(
-            content={"error": f"Error processing token: {str(e)}"},
-            status_code=400
+            content={"error": f"Error processing token: {str(e)}"}, status_code=400
         )
 
 
@@ -302,6 +329,7 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
         )
     return {"name": token.name, "is_stable": token.is_stable}
 
+
 # Token management UI
 @app.get("/tokens", response_class=HTMLResponse)
 async def tokens_page(request: Request, db: Session = Depends(get_db)):
@@ -311,14 +339,12 @@ async def tokens_page(request: Request, db: Session = Depends(get_db)):
     # Check if this is an HTMX request for just the token list
     if request.headers.get("HX-Request") == "true":
         return templates.TemplateResponse(
-            request,
-            "tokens_list.html",
-            {"request": request, "tokens": tokens}
+            request, "tokens_list.html", {"request": request, "tokens": tokens}
         )
 
     # Full page render
     return templates.TemplateResponse(
         request,
         "tokens.html",
-        {"request": request, "git_commit": GIT_COMMIT, "tokens": tokens}
+        {"request": request, "git_commit": GIT_COMMIT, "tokens": tokens},
     )

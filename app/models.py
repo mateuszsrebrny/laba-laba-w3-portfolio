@@ -1,5 +1,13 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, Float, String, DateTime, UniqueConstraint, Boolean
+from sqlalchemy import (
+    Column,
+    Integer,
+    Float,
+    String,
+    DateTime,
+    UniqueConstraint,
+    Boolean,
+)
 from app.database import Base
 
 

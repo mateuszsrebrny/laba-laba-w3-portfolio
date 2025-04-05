@@ -17,11 +17,34 @@ function build_tests() {
 function run_tests() {
     build_app
     build_tests
-    echo "▶ Running tests..."
+
+    if [ "$#" -eq 0 ]; then
+        echo "▶ Running tests..."
+    else
+        echo "▶ Running $@..."
+    fi
+
     docker run --rm --tty \
         -v "$(pwd)/tests:/src/tests" \
         -v "$(pwd)/features:/src/features" \
-        "$TEST_IMAGE_NAME"
+        -v "$(pwd)/app:/src/app" \
+        -v "$(pwd)/alembic:/src/alembic" \
+        "$TEST_IMAGE_NAME" "$@"
+}
+
+function run_format() {
+    echo "▶ Running formatter..."
+    run_tests black app tests features
+}
+
+function run_lint() {
+    echo "▶ Running linter..."
+    run_tests ruff check app tests features
+}
+
+function run_fix() {
+    echo "▶ Auto-fixing code issues..."
+    run_tests ruff check --fix app tests features
 }
 
 function start_services() {
@@ -71,6 +94,15 @@ case "$CMD" in
     ;;
   exec)
     exec_app "$@"
+    ;;
+  format)
+    run_format
+    ;;
+  lint)
+    run_lint
+    ;;
+  fix)
+    run_fix
     ;;
   *)
     echo "Usage: $0 {tests|start|stop} [docker compose args]"
