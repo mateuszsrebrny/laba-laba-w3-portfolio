@@ -52,7 +52,7 @@ function run_fix() {
 }
 
 function run_isort() {
-    run_on_test_image isort app tests features alembic
+    run_on_test_image isort --profile black app tests features alembic
 }
 
 function start_services() {
