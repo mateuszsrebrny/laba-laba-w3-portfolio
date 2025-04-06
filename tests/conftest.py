@@ -1,27 +1,30 @@
-import os
-
-# Use an in-memory SQLite database for testing
-TEST_DATABASE_URL = "sqlite:///:memory:"
-
-# make sure nothing connects to postgres
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-
 import pytest
+import os
 from fastapi.testclient import TestClient
 from pytest_bdd import given
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.database import get_db
+from app.config import get_settings
 from app.main import app
+from app.database import get_db
 from app.models import Base
+
+# Use an in-memory SQLite database for testing
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
 # Create a test database engine
 test_engine = create_engine(
     TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+TestingSessionLocal = sessionmaker(bind=test_engine, autoflush=False, autocommit=False)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _configure_test_env():
+    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    get_settings.cache_clear()  # next call to get_settings() will re-read env
 
 
 @pytest.fixture(scope="function")
@@ -31,6 +34,7 @@ def db():
     Base.metadata.create_all(bind=test_engine)  # Create tables before test
 
     db_session = TestingSessionLocal()
+
     try:
         yield db_session  # Provide session to test
     finally:

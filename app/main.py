@@ -1,8 +1,3 @@
-# Load environment variables before anything else
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import os
 from datetime import datetime
 
@@ -15,8 +10,8 @@ from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from app.database import engine, get_db
-from app.models import Base, Token, Transaction
+from app.database import get_db
+from app.models import Token, Transaction
 
 
 class TokenCreate(BaseModel):
@@ -31,9 +26,6 @@ class TransactionCreate(BaseModel):
     from_amount: float
     to_amount: float
 
-
-# Create tables
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
