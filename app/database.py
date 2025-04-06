@@ -1,8 +1,9 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-from app.config import get_settings
 from typing import Generator
-from sqlalchemy.orm import Session
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
+
+from app.config import get_settings
 
 Base = declarative_base()
 

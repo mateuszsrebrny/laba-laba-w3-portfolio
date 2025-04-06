@@ -1,5 +1,6 @@
-import pytest
 import os
+
+import pytest
 from fastapi.testclient import TestClient
 from pytest_bdd import given
 from sqlalchemy import create_engine
@@ -7,8 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.config import get_settings
-from app.main import app
 from app.database import get_db
+from app.main import app
 from app.models import Base
 
 # Use an in-memory SQLite database for testing
