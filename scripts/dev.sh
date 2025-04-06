@@ -6,7 +6,7 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
-    docker compose build laba-laba-app
+    env UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
 }
 
 function build_tests() {
@@ -56,12 +56,12 @@ function run_isort() {
 
 function start_services() {
     echo "▶ Starting app and database..."
-    GIT_COMMIT=$(git rev-parse HEAD) docker compose up -d "$@"
+    env GIT_COMMIT=$(git rev-parse HEAD) UID=$(id -u) GID=$(id -g) docker compose up -d "$@"
 }
 
 function stop_services() {
     echo "▶ Stopping all services..."
-    docker compose down "$@"
+    env UID=$(id -u) GID=$(id -g) docker compose down "$@"
 }
 
 function query_db() {

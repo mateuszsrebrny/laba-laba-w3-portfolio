@@ -13,7 +13,7 @@ services:
       GIT_COMMIT: ${GIT_COMMIT:-unknown-compose}
     ports:
       - "10000:10000"
-    user: "$(id -u):$(id -g)"
+    user: "${UID}:${GID}"
     volumes:
       - ./app:/src/app
       - ./alembic:/src/alembic
