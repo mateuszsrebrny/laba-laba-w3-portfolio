@@ -21,5 +21,8 @@ jobs:
       - name: Make dev.sh executable
         run: chmod +x ./scripts/dev.sh
 
+      - name: Build images
+        run: ./scripts/dev.sh build
+
       - name: Run tests
         run: ./scripts/dev.sh tests
