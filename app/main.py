@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -10,6 +9,7 @@ from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
+from app.config import get_git_commit
 from app.database import get_db
 from app.models import Token, Transaction
 
@@ -36,9 +36,6 @@ def format_datetime_for_input(dt: datetime) -> str:
 
 
 templates.env.filters["datetimeformat"] = format_datetime_for_input
-
-
-GIT_COMMIT = os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "unknown"
 
 
 class FormDataMiddleware(BaseHTTPMiddleware):
@@ -82,22 +79,26 @@ app.add_middleware(FormDataMiddleware)
 
 # Home page - Show transactions
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, db: Session = Depends(get_db)):
+async def home(
+    request: Request,
+    db: Session = Depends(get_db),
+    commit: str = Depends(get_git_commit),
+):
     transactions = db.query(Transaction).all()
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"request": request, "git_commit": GIT_COMMIT, "transactions": transactions},
+        {"request": request, "git_commit": commit, "transactions": transactions},
     )
 
 
 # Add transaction form
 @app.get("/add", response_class=HTMLResponse)
-async def add_transaction_page(request: Request):
+async def add_transaction_page(request: Request, commit: str = Depends(get_git_commit)):
     return templates.TemplateResponse(
         request,
         "add_transaction.html",
-        {"request": request, "git_commit": GIT_COMMIT, "now": datetime.utcnow()},
+        {"request": request, "git_commit": commit, "now": datetime.utcnow()},
     )
 
 
@@ -319,7 +320,11 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
 
 # Token management UI
 @app.get("/tokens", response_class=HTMLResponse)
-async def tokens_page(request: Request, db: Session = Depends(get_db)):
+async def tokens_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    commit: str = Depends(get_git_commit),
+):
     """Render the tokens management page."""
     tokens = db.query(Token).all()
 
@@ -333,5 +338,5 @@ async def tokens_page(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request,
         "tokens.html",
-        {"request": request, "git_commit": GIT_COMMIT, "tokens": tokens},
+        {"request": request, "git_commit": commit, "tokens": tokens},
     )
