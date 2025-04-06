@@ -2,7 +2,7 @@ FROM laba-laba-app
 
 # Install extra test dependencies
 COPY requirements-tests.txt /src/
-RUN pip install -r ./requirements-tests.txt
+RUN /root/.local/bin/uv pip install --system -r ./requirements-tests.txt
 
 COPY pytest.ini /src/
 

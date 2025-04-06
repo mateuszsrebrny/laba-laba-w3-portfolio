@@ -1,11 +1,16 @@
 # Use an official Python image
 FROM python:3.11
 
-# Set working directory inside the container
 WORKDIR /src/
 
+# Download the latest installer
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+# Run the installer then remove it
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
 COPY requirements.txt /src/
-RUN pip install -r requirements.txt
+RUN /root/.local/bin/uv pip install --system -r requirements.txt
 
 COPY alembic.ini /src/alembic.ini
 COPY scripts /src/scripts
