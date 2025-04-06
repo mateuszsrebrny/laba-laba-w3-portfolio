@@ -39,7 +39,7 @@ function run_tests() {
 }
 
 function run_format() {
-    run_on_test_image black app tests features alembic 
+    run_on_test_image black app tests features alembic
 }
 
 function run_lint() {
@@ -130,4 +130,5 @@ case "$CMD" in
     exit 1
     ;;
 esac
+
 

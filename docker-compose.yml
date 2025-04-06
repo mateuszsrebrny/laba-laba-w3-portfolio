@@ -19,7 +19,6 @@ services:
       - ./alembic:/src/alembic
     command: scripts/app_start_cmd.sh
 
-
   mysql:
     image: mysql:8.0
     container_name: laba-laba-dev-db

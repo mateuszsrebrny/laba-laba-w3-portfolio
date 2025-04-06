@@ -2,7 +2,8 @@ FROM laba-laba-app
 
 # Install extra test dependencies
 COPY requirements-tests.txt /src/
-RUN /root/.local/bin/uv pip install --system -r ./requirements-tests.txt
+RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
+    /root/.local/bin/uv pip install --system -r ./requirements-tests.txt
 
 COPY pytest.ini /src/
 

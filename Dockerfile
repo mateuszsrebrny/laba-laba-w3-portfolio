@@ -10,7 +10,8 @@ ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
 COPY requirements.txt /src/
-RUN /root/.local/bin/uv pip install --system -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
+    /root/.local/bin/uv pip install --system -r ./requirements.txt
 
 COPY alembic.ini /src/alembic.ini
 COPY scripts /src/scripts
