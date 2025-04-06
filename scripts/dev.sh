@@ -35,7 +35,6 @@ function run_on_test_image() {
 }
 
 function run_tests() {
-    build_images
     run_on_test_image
 }
 
@@ -79,6 +78,9 @@ CMD="$1"
 shift || true
 
 case "$CMD" in
+  build)
+    build_images
+    ;;
   tests)
     run_tests
     ;;
@@ -93,6 +95,7 @@ case "$CMD" in
   restart)
     stop_services "$@"
     echo "♻️ Restarting app and database..."
+    build_images
     run_tests
     echo "✅ Tests passed. Starting app and database..."
     start_services
@@ -104,19 +107,15 @@ case "$CMD" in
     exec_app "$@"
     ;;
   format)
-    build_images
     run_format
     ;;
   lint)
-    build_images
     run_lint
     ;;
   isort)
-    build_images
     run_isort
     ;;
   fix)
-    build_images
     run_fix
     ;;
   code_checks)
@@ -127,7 +126,7 @@ case "$CMD" in
     run_on_test_image
     ;;
   *)
-    echo "Usage: $0 {tests|start|stop} [docker compose args]"
+    echo "Usage: $0 COMMAND [optional PARAMS]"
     exit 1
     ;;
 esac
