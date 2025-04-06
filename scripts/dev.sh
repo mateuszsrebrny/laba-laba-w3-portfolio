@@ -14,10 +14,12 @@ function build_tests() {
     docker build -f Dockerfile.tests -t "$TEST_IMAGE_NAME" .
 }
 
-function run_tests() {
+function build_images() {
     build_app
     build_tests
+}
 
+function run_on_test_image() {
     if [ "$#" -eq 0 ]; then
         echo "▶ Running tests..."
     else
@@ -32,24 +34,25 @@ function run_tests() {
         "$TEST_IMAGE_NAME" "$@"
 }
 
+function run_tests() {
+    build_images
+    run_on_test_image
+}
+
 function run_format() {
-    echo "▶ Running formatter..."
-    run_tests black app tests features alembic 
+    run_on_test_image black app tests features alembic 
 }
 
 function run_lint() {
-    echo "▶ Running linter..."
-    run_tests ruff check app tests features
+    run_on_test_image ruff check app tests features alembic
 }
 
 function run_fix() {
-    echo "▶ Auto-fixing code issues..."
-    run_tests ruff check --fix app tests features
+    run_on_test_image ruff check --fix app tests features alembic
 }
 
 function run_isort() {
-    echo "▶ Running isort..."
-    run_tests isort app tests features
+    run_on_test_image isort app tests features alembic
 }
 
 function start_services() {
@@ -101,16 +104,27 @@ case "$CMD" in
     exec_app "$@"
     ;;
   format)
+    build_images
     run_format
     ;;
   lint)
+    build_images
     run_lint
     ;;
   isort)
+    build_images
     run_isort
     ;;
   fix)
+    build_images
     run_fix
+    ;;
+  code_checks)
+    run_tests
+    run_isort
+    run_format
+    run_lint
+    run_on_test_image
     ;;
   *)
     echo "Usage: $0 {tests|start|stop} [docker compose args]"
