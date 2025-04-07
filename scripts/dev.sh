@@ -46,7 +46,7 @@ function run_lint() {
     run_on_test_image ruff check app tests features alembic
 }
 
-function run_fix() {
+function run_lint_fix() {
     run_on_test_image ruff check --fix app tests features alembic
 }
 
@@ -115,15 +115,15 @@ case "$CMD" in
   isort)
     run_isort
     ;;
-  fix)
-    run_fix
+  lint_fix)
+    run_lint_fix
     ;;
-  code_checks)
+  code_fix)
+    build_images
     run_tests
     run_isort
     run_format
-    run_lint
-    run_on_test_image
+    run_lint_fix
     ;;
   *)
     echo "Usage: $0 COMMAND [optional PARAMS]"
