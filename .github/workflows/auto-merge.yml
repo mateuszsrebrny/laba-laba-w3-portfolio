@@ -32,7 +32,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git fetch origin
-          git checkout main
+          git checkout production
           git pull
           git merge main --ff-only
           git push origin production
