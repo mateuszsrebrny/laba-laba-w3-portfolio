@@ -1,7 +1,8 @@
-from pytest_bdd import given, when, then, parsers, scenarios
 import pytest
+from pytest_bdd import given, parsers, scenarios, then, when
 
 scenarios("manage_token.feature")
+
 
 # Reusable fixture for marking tokens
 @pytest.fixture
@@ -10,6 +11,7 @@ def mark_token(client):
         payload = {"token": token, "is_stable": is_stable}
         response = client.post("/tokens", json=payload)
         return response
+
     return _mark_token
 
 
@@ -20,7 +22,11 @@ def mark_as_stablecoin(token, mark_token):
     pytest.last_response = response
 
 
-@then(parsers.parse('the system should record that "{token}" is now recognized as a stablecoin'))
+@then(
+    parsers.parse(
+        'the system should record that "{token}" is now recognized as a stablecoin'
+    )
+)
 def verify_token_is_stablecoin(token, client):
     response = client.get(f"/tokens/{token}")
     assert response.status_code == 200
@@ -36,7 +42,11 @@ def mark_as_non_stablecoin(token, mark_token):
     pytest.last_response = response
 
 
-@then(parsers.parse('the system should record that "{token}" is now recognized as a non-stablecoin'))
+@then(
+    parsers.parse(
+        'the system should record that "{token}" is now recognized as a non-stablecoin'
+    )
+)
 def verify_token_is_non_stablecoin(token, client):
     response = client.get(f"/tokens/{token}")
     assert response.status_code == 200
@@ -58,10 +68,11 @@ def try_to_mark_as_non_stablecoin(token, mark_token):
     pytest.last_response = response
 
 
-@then(parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"'))
+@then(
+    parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"')
+)
 def verify_error_message(error_code, error_msg):
     assert pytest.last_response.status_code == error_code
     json_body = pytest.last_response.json()
     assert "error" in json_body
     assert json_body["error"] == error_msg
-

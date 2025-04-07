@@ -2,11 +2,12 @@ FROM laba-laba-app
 
 # Install extra test dependencies
 COPY requirements-tests.txt /src/
-RUN pip install -r ./requirements-tests.txt
+RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
+    /root/.local/bin/uv pip install --system -r ./requirements-tests.txt
 
-COPY tests/ /src/tests/
-COPY features/ /src/features/
 COPY pytest.ini /src/
+
+# features/ and tests/ will be overlain in the dev.sh script
 
 # Default command
 CMD ["pytest", "tests/"]

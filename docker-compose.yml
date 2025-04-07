@@ -13,11 +13,11 @@ services:
       GIT_COMMIT: ${GIT_COMMIT:-unknown-compose}
     ports:
       - "10000:10000"
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
+      - ./app:/src/app
       - ./alembic:/src/alembic
-    #command: ["bash", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 10000"]
     command: scripts/app_start_cmd.sh
-
 
   mysql:
     image: mysql:8.0

@@ -34,4 +34,6 @@ jobs:
           git fetch origin
           git checkout main
           git pull
-          git push origin main:production --force
+          git merge main --ff-only
+          git push origin production
+

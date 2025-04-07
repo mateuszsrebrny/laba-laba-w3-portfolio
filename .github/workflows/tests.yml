@@ -1,6 +1,14 @@
 name: Run Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - production
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
   test:
@@ -12,6 +20,9 @@ jobs:
 
       - name: Make dev.sh executable
         run: chmod +x ./scripts/dev.sh
+
+      - name: Build images
+        run: ./scripts/dev.sh build
 
       - name: Run tests
         run: ./scripts/dev.sh tests

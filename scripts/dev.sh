@@ -6,7 +6,7 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
-    docker compose build laba-laba-app
+    env UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
 }
 
 function build_tests() {
@@ -14,21 +14,54 @@ function build_tests() {
     docker build -f Dockerfile.tests -t "$TEST_IMAGE_NAME" .
 }
 
-function run_tests() {
+function build_images() {
     build_app
     build_tests
-    echo "▶ Running tests..."
-    docker run --rm --tty "$TEST_IMAGE_NAME"
+}
+
+function run_on_test_image() {
+    if [ "$#" -eq 0 ]; then
+        echo "▶ Running tests..."
+    else
+        echo "▶ Running $@..."
+    fi
+
+    docker run --rm --tty \
+        -v "$(pwd)/tests:/src/tests" \
+        -v "$(pwd)/features:/src/features" \
+        -v "$(pwd)/app:/src/app" \
+        -v "$(pwd)/alembic:/src/alembic" \
+        "$TEST_IMAGE_NAME" "$@"
+}
+
+function run_tests() {
+    run_on_test_image
+}
+
+function run_format() {
+    run_on_test_image black app tests features alembic
+}
+
+function run_lint() {
+    run_on_test_image ruff check app tests features alembic
+}
+
+function run_lint_fix() {
+    run_on_test_image ruff check --fix app tests features alembic
+}
+
+function run_isort() {
+    run_on_test_image isort --profile black app tests features alembic
 }
 
 function start_services() {
     echo "▶ Starting app and database..."
-    GIT_COMMIT=$(git rev-parse HEAD) docker compose up -d "$@"
+    env GIT_COMMIT=$(git rev-parse HEAD) UID=$(id -u) GID=$(id -g) docker compose up -d "$@"
 }
 
 function stop_services() {
     echo "▶ Stopping all services..."
-    docker compose down "$@"
+    env UID=$(id -u) GID=$(id -g) docker compose down "$@"
 }
 
 function query_db() {
@@ -36,15 +69,26 @@ function query_db() {
     echo "$@" | mysql -ull_dev_user -pll_dev_db_pass -h127.0.0.1 ll_dev
 }
 
-function exec_app() {    
+function exec_app() {
     echo "▶ Executing command ... "
     docker exec -it laba-laba-dev-app "$@"
+}
+
+function install_githooks() {
+    
+	ln -sf "$(pwd)/.githooks/pre-commit" "$(pwd)/.git/hooks/pre-commit"
+	chmod +x "$(pwd)/.git/hooks/pre-commit"
+
+	echo "Git hooks installed successfully!"
 }
 
 CMD="$1"
 shift || true
 
 case "$CMD" in
+  build)
+    build_images
+    ;;
   tests)
     run_tests
     ;;
@@ -59,6 +103,7 @@ case "$CMD" in
   restart)
     stop_services "$@"
     echo "♻️ Restarting app and database..."
+    build_images
     run_tests
     echo "✅ Tests passed. Starting app and database..."
     start_services
@@ -69,9 +114,32 @@ case "$CMD" in
   exec)
     exec_app "$@"
     ;;
+  format)
+    run_format
+    ;;
+  lint)
+    run_lint
+    ;;
+  isort)
+    run_isort
+    ;;
+  lint_fix)
+    run_lint_fix
+    ;;
+  code_fix)
+    build_images
+    run_tests
+    run_isort
+    run_format
+    run_lint_fix
+    ;;
+  install_githooks)
+    install_githooks
+    ;;
   *)
-    echo "Usage: $0 {tests|start|stop} [docker compose args]"
+    echo "Usage: $0 COMMAND [optional PARAMS]"
     exit 1
     ;;
 esac
+
 

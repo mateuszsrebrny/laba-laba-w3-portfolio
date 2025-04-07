@@ -3,3 +3,6 @@ pytest
 pytest-bdd
 requests
 httpx
+black
+ruff
+isort
