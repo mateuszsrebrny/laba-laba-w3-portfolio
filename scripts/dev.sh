@@ -128,7 +128,6 @@ case "$CMD" in
     ;;
   code_fix)
     build_images
-    run_tests
     run_isort
     run_format
     run_lint_fix
