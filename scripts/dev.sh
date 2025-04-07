@@ -74,6 +74,14 @@ function exec_app() {
     docker exec -it laba-laba-dev-app "$@"
 }
 
+function install_githooks() {
+    
+	ln -sf "$(pwd)/.githooks/pre-commit" "$(pwd)/.git/hooks/pre-commit"
+	chmod +x "$(pwd)/.git/hooks/pre-commit"
+
+	echo "Git hooks installed successfully!"
+}
+
 CMD="$1"
 shift || true
 
@@ -124,6 +132,9 @@ case "$CMD" in
     run_isort
     run_format
     run_lint_fix
+    ;;
+  install_githooks)
+    install_githooks
     ;;
   *)
     echo "Usage: $0 COMMAND [optional PARAMS]"
