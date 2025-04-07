@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Make dev.sh executable
         run: chmod +x ./scripts/dev.sh
@@ -26,3 +26,6 @@ jobs:
 
       - name: Run tests
         run: ./scripts/dev.sh tests
+
+      - name: Run linter
+        run: ./scripts/dev.sh lint
