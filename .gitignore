@@ -9,3 +9,4 @@ instance/
 .vscode/
 .venv
 commit.txt
+load_data*.sh
