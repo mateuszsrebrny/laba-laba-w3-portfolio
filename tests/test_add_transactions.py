@@ -1,6 +1,8 @@
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
+from tests.config import TRANSACTIONS_ENDPOINT, UI_HOME
+
 scenarios("add_transaction.feature")
 
 
@@ -23,7 +25,7 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
         "to_amount": to_amount,
     }
     pytest.last_payload = payload
-    response = client.post("/transactions", json=payload)
+    response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
     assert response.status_code == 200
 
@@ -43,7 +45,7 @@ def verify_transaction_recorded(
 ):
     """Verify that a transaction with the specified details is shown on the list."""
 
-    response = client.get("/")
+    response = client.get(UI_HOME)
     assert response.status_code == 200
     response_text = response.text
 
@@ -77,7 +79,7 @@ def try_to_add_same_transaction_again(client):
         "amount": last_payload["amount"] + 1,
         "total_usd": last_payload["total_usd"] + 1,
     }
-    response = client.post("/transactions", data=payload)
+    response = client.post(TRANSACTIONS_ENDPOINT, data=payload)
     pytest.last_response = response
 
 
@@ -102,7 +104,7 @@ def try_add_transaction(
     pytest.last_payload = payload
 
     # Send the POST request to the /transactions endpoint
-    response = client.post("/transactions", json=payload)
+    response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
 
     # Store the response for later verification
     pytest.last_response = response
@@ -139,7 +141,7 @@ def try_add_transaction_same_timestamp(
     pytest.last_payload = payload
 
     # This should fail with 409 Conflict
-    response = client.post("/transactions", json=payload)
+    response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
     # Don't assert here - the calling test will verify the status code
 
@@ -163,7 +165,7 @@ def add_transaction_different_token_same_timestamp(
     }
 
     # This should succeed
-    response = client.post("/transactions", json=payload)
+    response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
     assert response.status_code == 200  # This should work since it's a different token
 
@@ -171,7 +173,7 @@ def add_transaction_different_token_same_timestamp(
 @then("the second transactions should be recorded successfully in the system")
 def second_transaction_should_be_recorded(client):
     last_payload = pytest.last_payload
-    response = client.get("/")
+    response = client.get(UI_HOME)
     assert str(last_payload["timestamp"]) in response.text
     assert last_payload["from_token"] in response.text
     assert str(last_payload["from_amount"]) in response.text

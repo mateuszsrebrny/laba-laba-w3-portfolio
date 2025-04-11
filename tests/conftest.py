@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.main import app
 from app.models import Base
+from tests.config import HEALTH_ENDPOINT
 
 # Use an in-memory SQLite database for testing
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -63,7 +64,7 @@ def client(db):
 def mark_token(client):
     def _mark_token(token, is_stable):
         payload = {"token": token, "is_stable": is_stable}
-        response = client.post("/tokens", json=payload)
+        response = client.post("/api/tokens", json=payload)
         assert response.status_code == 200
 
     return _mark_token
@@ -71,5 +72,9 @@ def mark_token(client):
 
 @given("the API is running")
 def api_is_running(client):
-    response = client.get("/")
+    response = client.get(HEALTH_ENDPOINT)
     assert response.status_code == 200
+    health_json = response.json()
+    assert health_json["status"] == "healthy"
+    assert health_json["components"]["api"] == "healthy"
+    assert health_json["components"]["ui"] == "healthy"
