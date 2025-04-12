@@ -6,3 +6,7 @@ httpx
 black
 ruff
 isort
+pytest-playwright
+playwright
+anyio
+

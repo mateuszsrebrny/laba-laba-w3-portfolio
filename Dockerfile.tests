@@ -1,9 +1,32 @@
 FROM laba-laba-app
 
+# Install system dependencies required for Playwright browsers
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libxcomposite1 \
+    libxrandr2 \
+    libxdamage1 \
+    libxkbcommon0 \
+    libgbm1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    fonts-liberation \
+    libfontconfig1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Install extra test dependencies
 COPY requirements-tests.txt /src/
 RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
     /root/.local/bin/uv pip install --system -r ./requirements-tests.txt
+
+# Install Playwright browsers
+RUN playwright install --with-deps --only-shell chromium
+
 
 COPY pytest.ini /src/
 

@@ -82,6 +82,10 @@ function install_githooks() {
 	echo "Git hooks installed successfully!"
 }
 
+function docker_prune() {
+    docker image prune -f
+}
+
 CMD="$1"
 shift || true
 
@@ -134,6 +138,9 @@ case "$CMD" in
     ;;
   install_githooks)
     install_githooks
+    ;;
+  docker_prune)
+    docker_prune
     ;;
   *)
     echo "Usage: $0 COMMAND [optional PARAMS]"
