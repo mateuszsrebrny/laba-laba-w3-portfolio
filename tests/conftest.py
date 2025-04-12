@@ -1,4 +1,5 @@
 import os
+from multiprocessing import Process
 
 import pytest
 from fastapi.testclient import TestClient
@@ -6,6 +7,7 @@ from pytest_bdd import given
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from uvicorn import run
 
 from app.config import get_settings
 from app.database import get_db
@@ -28,7 +30,7 @@ def _configure_test_env():
     get_settings.cache_clear()  # next call to get_settings() will re-read env
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def db():
     """Creates a new database session for a test."""
 
@@ -43,7 +45,7 @@ def db():
         Base.metadata.drop_all(bind=test_engine)  # Cleanup after test
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def client(db):
     """Override the database dependency and provide a test client."""
 
@@ -57,6 +59,39 @@ def client(db):
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="session")
+def http_server(db):
+    """Start a live HTTP server with overridden dependencies."""
+
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            db.close()
+
+    # Override get_db() to use the test database
+    app.dependency_overrides[get_db] = override_get_db
+
+    # Start the server in a separate process
+    process = Process(
+        target=run, kwargs={"app": app, "host": "127.0.0.1", "port": 11111}
+    )
+    process.start()
+    yield  # Tests will run while this fixture is active
+    process.terminate()  # Stop the server after tests are done
+
+    # Clear overrides after stopping the server
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def page(playwright, http_server):  # Ensure http_server is started before tests
+    browser = playwright.chromium.launch(headless=True)  # Run in headless mode
+    context = browser.new_context()
+    yield context.new_page()
+    browser.close()
 
 
 @pytest.fixture
