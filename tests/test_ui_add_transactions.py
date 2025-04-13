@@ -23,12 +23,11 @@ def fill_transaction_form(page):
     page.click(
         '.flatpickr-day[aria-label="April 12, 2025"]'
     )  # Adjust selector based on your Flatpickr configuration
-    # page.fill('input[name="timestamp"]', '2025-04-12T12:00:00')  # Fill timestamp field
 
 
-@when("I submit the form")
+@when("I click on the 'Add Transaction' button")
 def submit_form(page):
-    page.click('button[type="submit"]')  # Click the submit button
+    page.get_by_role("button", name="Add Transaction").click()
 
 
 @then("I should see a success message mentioning BTC and DAI")

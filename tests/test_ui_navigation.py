@@ -27,3 +27,13 @@ def click_add_transaction_button(page):
 @then("I should be redirected to the 'Add Transaction' page")
 def verify_redirect_to_add_transaction_page(page):
     assert page.url == "http://127.0.0.1:11111/add"  # Verify URL
+
+
+@when("I click on the 'Back to Transactions' button")
+def click_back_to_main_page_button(page):
+    page.click("text=Back to Transactions")  # Click Back button
+
+
+@then("I should be redirected to the main page")
+def verify_redirect_to_main_page(page):
+    assert page.url == "http://127.0.0.1:11111/"
