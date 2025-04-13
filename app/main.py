@@ -340,3 +340,8 @@ async def tokens_page(
         "tokens.html",
         {"request": request, "git_commit": commit, "tokens": tokens},
     )
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "components": {"api": "healthy", "ui": "healthy"}}
