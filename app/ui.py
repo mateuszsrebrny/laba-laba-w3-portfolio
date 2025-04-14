@@ -50,18 +50,6 @@ async def add_transaction_page(
         {
             "request": request,
             "git_commit": commit,
-            "now": datetime.utcnow(),
-        },
-    )
-
-
-@router.get("/transactions/form", response_class=HTMLResponse)
-async def transaction_form(request: Request):
-    return templates.TemplateResponse(
-        "add_transaction_form.html",
-        {
-            "request": request,
-            "now": datetime.utcnow(),
         },
     )
 
