@@ -1,3 +1,4 @@
+from playwright.sync_api import expect
 from pytest_bdd import given, scenarios, then, when
 
 # Load the feature file
@@ -38,3 +39,33 @@ def verify_success_message(page):
     assert "Transaction added: timestamp" in success_message
     assert "token 'BTC'" in success_message
     assert "stable_coin 'DAI'" in success_message
+
+
+@then("the transaction form should be reloaded")
+def verify_transaction_form_reloaded(page):
+    # Wait for the form element to be available
+    # page.wait_for_selector("form[hx-post='/ui/transactions']", timeout=1000)
+    form = page.locator("form[hx-post='/ui/transactions']")
+    expect(form).to_be_visible(timeout=1000)
+
+    from_token_input = form.locator('input[name="from_token"]')
+    expect(from_token_input).to_be_visible(timeout=1000)
+
+    # Check that key input fields are in their default state (e.g., empty)
+    from_token_value = page.locator('input[name="from_token"]').input_value()
+    to_token_value = page.locator('input[name="to_token"]').input_value()
+    from_amount_value = page.locator('input[name="from_amount"]').input_value()
+    to_amount_value = page.locator('input[name="to_amount"]').input_value()
+
+    # You might also check other fields if applicable—for example, that they are empty.
+    assert (
+        from_token_value == ""
+    ), f"Expected empty from_token, got '{from_token_value}'"
+    assert to_token_value == "", f"Expected empty to_token, got '{to_token_value}'"
+    assert (
+        from_amount_value == ""
+    ), f"Expected empty from_amount, got '{from_amount_value}'"
+    assert to_amount_value == "", f"Expected empty to_amount, got '{to_amount_value}'"
+
+    # Optionally, check that the submit button exists
+    expect(page.locator("button", has_text="Add Transaction")).to_be_visible()
