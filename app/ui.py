@@ -55,6 +55,17 @@ async def add_transaction_page(
     )
 
 
+@router.get("/transactions/form", response_class=HTMLResponse)
+async def transaction_form(request: Request):
+    return templates.TemplateResponse(
+        "add_transaction_form.html",
+        {
+            "request": request,
+            "now": datetime.utcnow(),
+        },
+    )
+
+
 @router.post("/transactions", response_class=JSONResponse)
 async def add_transaction_form(
     request: Request,

@@ -1,0 +1,69 @@
+<form hx-post="/ui/transactions" hx-indicator="#loading" id="transaction-form">
+    <div id="loading" class="htmx-indicator">Submitting...</div>
+    
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <label class="form-label">Timestamp:</label>
+            <input 
+                id="timestamp"
+                type="text" 
+                name="timestamp" 
+                required class="form-control"
+                value="{{ now|datetimeformat }}"
+            >
+        </div>
+    </div>
+    
+    <div class="card mb-3">
+        <div class="card-header">Exchange Details</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>From</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Token:</label>
+                        <input type="text" name="from_token" required class="form-control" placeholder="e.g. BTC or DAI">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount:</label>
+                        <input type="number" step="any" name="from_amount" required class="form-control" placeholder="Amount">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>To</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Token:</label>
+                        <input type="text" name="to_token" required class="form-control" placeholder="e.g. DAI or BTC">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount:</label>
+                        <input type="number" step="any" name="to_amount" required class="form-control" placeholder="Amount">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <small>
+                    <strong>Note:</strong> One token must be a stablecoin (e.g., DAI, USDC) and one must be a non-stablecoin (e.g., BTC, ETH).
+                    Make sure to register tokens first if you haven't already.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Add Transaction</button>
+    <a href="/ui/" class="btn btn-secondary">Back to Transactions</a>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr("#timestamp", {
+        enableTime: true,
+        enableSeconds: true,
+        time_24hr: true,
+        dateFormat: "Y-m-d H:i:S",
+        defaultDate: "{{ now|datetimeformat }}"
+	    //defaultDate: new Date().toISOString().slice(0, 19)
+    });
+</script>
