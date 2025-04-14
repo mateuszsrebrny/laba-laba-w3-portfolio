@@ -21,15 +21,13 @@ def submit_form(page):
 
 @then("I should see a success message \"Token 'AAVE' marked as non-stablecoin\"")
 def verify_success_message(page):
-    # success_message = page.locator(
-    #    "#message .alert-success"
-    # ).inner_text()  # Locate success message
-    # assert "'AAVE' marked as non-stablecoin" in success_message
-    pass
+    success_message = page.locator(
+        "#message .alert-success"
+    ).inner_text()  # Locate success message
+    assert "'AAVE' marked as non-stablecoin" in success_message
 
 
 @then("I should see the token in the list")
 def verify_token_in_list(page):
-    # token_row = page.locator("table tbody tr td:text('AAVE')")
-    # assert token_row.is_visible()  # Verify that BTC appears in the table
-    pass
+    token_row = page.locator("table tbody tr td:text('AAVE')")
+    assert token_row.is_visible()  # Verify that BTC appears in the table

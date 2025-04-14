@@ -3,6 +3,16 @@
     <h2>Manage Tokens</h2>
     <div id="message" class="text-danger mb-2"></div>
 
+    <style>
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: block;
+        }
+    </style>
+
+
     <script>
         function showMessage(message, type) {
             const messageContainer = document.getElementById('message');
@@ -27,8 +37,12 @@
                 if (response.status === 'success') {
                     showMessage(response.message, 'success');
                     // Refresh token list
-                    document.getElementById('token-list').setAttribute('hx-get', '/ui/tokens');
-                    document.getElementById('token-list').setAttribute('hx-trigger', 'load');
+                    //document.getElementById('token-list').setAttribute('hx-get', '/ui/tokens');
+                    //document.getElementById('token-list').setAttribute('hx-trigger', 'load');
+                    const tokenList = document.getElementById('token-list');
+                                
+                   // Trigger an immediate reload of the token list
+                   htmx.trigger(tokenList, 'load');
                 }
             }
         });
@@ -53,12 +67,12 @@
             <div class="card">
                 <div class="card-header">Add New Token</div>
                 <div class="card-body">
-                    <form hx-post="/ui/tokens" hx-indicator="#loading">
-                        <div id="loading" class="htmx-indicator">Submitting...</div>
-                        
+                    <form id="token-form" class="needs-validation" novalidate>
+    			        <div id="loading" class="htmx-indicator">Submitting...</div>
+    
                         <div class="mb-3">
                             <label class="form-label">Token Symbol:</label>
-                            <input type="text" name="token" required class="form-control" placeholder="e.g. BTC, ETH, DAI">
+                            <input type="text" name="token" id="token" required class="form-control" placeholder="e.g. BTC, ETH, DAI">
                         </div>
                         
                         <div class="mb-3">
@@ -76,9 +90,61 @@
                                 </label>
                             </div>
                         </div>
-                        
+    
                         <button type="submit" class="btn btn-primary">Add Token</button>
                     </form>
+
+                    <script>
+                        document.getElementById('token-form').addEventListener('submit', async function(e) {
+                            e.preventDefault();
+                            
+                            // Show loading indicator
+                            document.getElementById('loading').style.display = 'block';
+                            
+                            // Get form values
+                            const token = document.getElementById('token').value;
+                            const isStable = document.querySelector('input[name="is_stable"]:checked').value === 'true';
+                            
+                            try {
+                                // Send JSON request to API endpoint
+                                const response = await fetch('/api/tokens', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        token: token,
+                                        is_stable: isStable
+                                    })
+                                });
+                                
+                                const data = await response.json();
+                                
+                                // Hide loading indicator
+                                document.getElementById('loading').style.display = 'none';
+                                
+                                if (response.ok) {
+                                    // Show success message
+                                    showMessage(data.message, 'success');
+                                    
+                                    // Refresh token list
+                                    document.getElementById('token-list').setAttribute('hx-get', '/ui/tokens');
+                                    document.getElementById('token-list').setAttribute('hx-trigger', 'load');
+                                    
+                                    // Clear form
+                                    document.getElementById('token').value = '';
+                                    document.getElementById('non-stablecoin').checked = true;
+                                } else {
+                                    // Show error message
+                                    showMessage(data.error || 'An error occurred', 'danger');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                document.getElementById('loading').style.display = 'none';
+                                showMessage('Failed to connect to server', 'danger');
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
