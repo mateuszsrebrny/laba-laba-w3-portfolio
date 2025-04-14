@@ -32,10 +32,9 @@ def submit_form(page):
 
 @then("I should see a success message mentioning BTC and DAI")
 def verify_success_message(page):
-    # success_message = page.locator(
-    #    "#message .alert-success"
-    # ).inner_text()  # Locate success message
-    # assert "Transaction with timestamp" in success_message
-    # assert "token 'BTC'" in success_message
-    # assert "stable_coin 'DAI'" in success_message
-    pass
+    success_message = page.locator(
+        "#message .alert-success"
+    ).inner_text()  # Locate success message
+    assert "Transaction added: timestamp" in success_message
+    assert "token 'BTC'" in success_message
+    assert "stable_coin 'DAI'" in success_message
