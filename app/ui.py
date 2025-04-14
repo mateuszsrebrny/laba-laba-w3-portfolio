@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.api import TokenCreate, add_token_api
 from app.config import get_git_commit
 from app.database import get_db
 from app.models import Token, Transaction
@@ -78,3 +79,21 @@ async def tokens_page(
             "tokens": tokens,
         },
     )
+
+
+@router.post("/tokens", response_class=JSONResponse)
+async def add_token_form(
+    request: Request,
+    token: str = Form(...),
+    is_stable: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Handle the form submission on /ui/tokens.
+
+    Convert form data into a TokenCreate model and call the API logic directly.
+    """
+    # Construct the TokenCreate model from the form data.
+    token_create = TokenCreate(token=token, is_stable=(is_stable.lower() == "true"))
+    # Call your API route logic internally.
+    return await add_token_api(token_create, db)
