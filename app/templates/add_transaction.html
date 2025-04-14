@@ -27,7 +27,20 @@
                 const response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
                     showMessage(response.message, 'success');
-                }
+                
+                    if (event.target.id === "transaction-form") {
+                        // Reset all input fields in the form.
+                        event.target.reset();
+
+                        // Additionally, clear the flatpickr instance on the #timestamp input if it's active.
+                        const ts = event.target.querySelector("#timestamp");
+                        if (ts && ts._flatpickr) {
+                            //ts._flatpickr.clear();
+                            ts._flatpickr.setDate(new Date(), true);
+                        }
+                    }	
+
+				}
             }
         });
 
@@ -44,6 +57,20 @@
             }
             showMessage(errorMessage, 'danger');
         });
+
+        // Reinitialize flatpickr after HTMX loads the transaction form.
+        document.body.addEventListener("htmx:afterSwap", function(event) {
+            if (event.detail.target.id === "transaction-form-container") {
+                flatpickr("#timestamp", {
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    defaultDate: document.getElementById("timestamp").value
+                });
+            }
+        });
+
     </script>
 
     <div id="transaction-form-container" 
@@ -51,4 +78,15 @@
         hx-trigger="load">
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#timestamp", {
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            defaultDate: "{{ now|datetimeformat }}"
+            //defaultDate: new Date().toISOString().slice(0, 19)
+        });
+    </script>
 {% endblock %}

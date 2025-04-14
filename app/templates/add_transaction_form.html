@@ -1,4 +1,6 @@
-<form hx-post="/ui/transactions" hx-indicator="#loading" id="transaction-form">
+<form hx-post="/ui/transactions" hx-indicator="#loading" 
+    hx-swap="none"
+    id="transaction-form">
     <div id="loading" class="htmx-indicator">Submitting...</div>
     
     <div class="row mb-3">
@@ -56,14 +58,3 @@
     <a href="/ui/" class="btn btn-secondary">Back to Transactions</a>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-    flatpickr("#timestamp", {
-        enableTime: true,
-        enableSeconds: true,
-        time_24hr: true,
-        dateFormat: "Y-m-d H:i:S",
-        defaultDate: "{{ now|datetimeformat }}"
-	    //defaultDate: new Date().toISOString().slice(0, 19)
-    });
-</script>
