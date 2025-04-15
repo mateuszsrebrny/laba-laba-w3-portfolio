@@ -31,3 +31,16 @@ def verify_success_message(page):
 def verify_token_in_list(page):
     token_row = page.locator("table tbody tr td:text('AAVE')")
     assert token_row.is_visible()  # Verify that BTC appears in the table
+
+
+@then("the 'Add Token' form should remain visible")
+def check_token_form_visible(page):
+    # Check that the form with id "token-form" is still visible on the page.
+    assert page.is_visible("form#token-form"), "Token form is not visible!"
+
+
+@then("the 'Token' field should be empty")
+def check_token_field_empty(page):
+    # Verify that the token input field has an empty value.
+    token_value = page.input_value("input[name='token']")
+    assert token_value == "", f"Token field is not empty: '{token_value}'"
