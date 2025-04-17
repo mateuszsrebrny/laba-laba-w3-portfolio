@@ -7,3 +7,4 @@ Feature: UI: add a transaction
     When I fill in the transaction form with valid data
     And I click on the 'Add Transaction' button 
     Then I should see a success message mentioning BTC and DAI
+    And the transaction form should be reloaded

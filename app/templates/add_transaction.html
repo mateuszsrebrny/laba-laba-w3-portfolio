@@ -27,7 +27,19 @@
                 const response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
                     showMessage(response.message, 'success');
-                }
+                
+                    if (event.target.id === "transaction-form") {
+                        // Reset all input fields in the form.
+                        event.target.reset();
+
+                        // Additionally, clear the flatpickr instance on the #timestamp input if it's active.
+                        const ts = event.target.querySelector("#timestamp");
+                        if (ts && ts._flatpickr) {
+                            ts._flatpickr.setDate(new Date(), true);
+                        }
+                    }	
+
+				}
             }
         });
 
@@ -44,9 +56,12 @@
             }
             showMessage(errorMessage, 'danger');
         });
+
     </script>
 
-    <form hx-post="/ui/transactions" hx-indicator="#loading">
+    <form hx-post="/ui/transactions" hx-indicator="#loading" 
+        hx-swap="none"
+        id="transaction-form">
         <div id="loading" class="htmx-indicator">Submitting...</div>
         
         <div class="row mb-3">
@@ -57,7 +72,6 @@
                     type="text" 
                     name="timestamp" 
                     required class="form-control"
-                    value="{{ now|datetimeformat }}"
                 >
             </div>
         </div>
@@ -99,20 +113,19 @@
                 </div>
             </div>
         </div>
-
+    
         <button type="submit" class="btn btn-success">Add Transaction</button>
         <a href="/ui/" class="btn btn-secondary">Back to Transactions</a>
     </form>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-    flatpickr("#timestamp", {
-      enableTime: true,
-      enableSeconds: true,
-      time_24hr: true,
-      dateFormat: "Y-m-d H:i:S",
-      defaultDate: "{{ now|datetimeformat }}"
-	  //defaultDate: new Date().toISOString().slice(0, 19)
-    });
+        flatpickr("#timestamp", {
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+            defaultDate: new Date()
+        });
     </script>
 {% endblock %}

@@ -50,7 +50,6 @@ async def add_transaction_page(
         {
             "request": request,
             "git_commit": commit,
-            "now": datetime.utcnow(),
         },
     )
 
