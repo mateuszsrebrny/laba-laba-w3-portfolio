@@ -1,6 +1,6 @@
 from pytest_bdd import given, scenarios, then, when
 
-scenarios("ui/manage_token.feature")
+scenarios("features/manage_token.feature")
 
 
 @given("I am on the 'Tokens' page")

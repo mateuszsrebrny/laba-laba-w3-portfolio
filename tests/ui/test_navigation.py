@@ -1,7 +1,7 @@
 from pytest_bdd import given, scenarios, then, when
 
 # Load the feature file
-scenarios("ui/navigation.feature")
+scenarios("features/navigation.feature")
 
 
 @given("I am on the main page")

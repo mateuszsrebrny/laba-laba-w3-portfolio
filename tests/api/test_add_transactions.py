@@ -3,7 +3,7 @@ from pytest_bdd import given, parsers, scenarios, then, when
 
 from tests.config import TRANSACTIONS_ENDPOINT, UI_HOME
 
-scenarios("add_transaction.feature")
+scenarios("features/add_transaction.feature")
 
 
 @given(
@@ -30,11 +30,6 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
     assert response.status_code == 200
 
 
-@given(parsers.parse('"{token}" is marked as a stablecoin'))
-def mark_as_stablecoin(token, mark_token):
-    mark_token(token, is_stable=True)
-
-
 @then(
     parsers.parse(
         'the transaction should be recorded with timestamp "{timestamp:ti}", token "{token}", amount "{amount:f}", stable_coin "{stable_coin}", and total_usd "{total_usd:f}"'
@@ -58,11 +53,6 @@ def verify_transaction_recorded(
     assert (
         str(total_usd) in response_text
     ), f"Total USD {total_usd} not found in response"
-
-
-@given(parsers.parse('"{token}" is marked as a non-stablecoin'))
-def mark_token_as_non_stablecoin(token, mark_token):
-    mark_token(token, is_stable=False)
 
 
 @given(parsers.parse('"{token}" is not marked in any way'))

@@ -40,7 +40,7 @@ RUN --mount=type=cache,target=/tmp/ms-playwright \
 
 COPY pytest.ini /src/
 
-# features/ and tests/ will be overlain in the dev.sh script
+# tests/ will be overlain in the dev.sh script
 
 # Default command
 CMD ["pytest", "tests/"]
