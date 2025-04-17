@@ -1,11 +1,11 @@
 from pytest_bdd import given, scenarios, then, when
 
-scenarios("ui/manage_token.feature")
+scenarios("features/manage_token.feature")
 
 
 @given("I am on the 'Tokens' page")
 def navigate_to_tokens_page(page):
-    page.goto("http://127.0.0.1:11111/tokens")  # Navigate to the Tokens page
+    page.goto("http://127.0.0.1:11111/ui/tokens")  # Navigate to the Tokens page
 
 
 @when("I fill in the 'Add Token' form with valid data")

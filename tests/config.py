@@ -1,0 +1,8 @@
+API_PREFIX = "/api"
+TOKENS_ENDPOINT = f"{API_PREFIX}/tokens"
+TRANSACTIONS_ENDPOINT = f"{API_PREFIX}/transactions"
+HEALTH_ENDPOINT = "/health"
+UI_PREFIX = "/ui"
+UI_HOME = f"{UI_PREFIX}/"
+UI_ADD_TRANSACTIONS = f"{UI_PREFIX}/add"
+UI_TOKENS = f"{UI_PREFIX}/tokens"

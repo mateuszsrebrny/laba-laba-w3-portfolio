@@ -28,7 +28,6 @@ function run_on_test_image() {
 
     docker run --rm --tty \
         -v "$(pwd)/tests:/src/tests" \
-        -v "$(pwd)/features:/src/features" \
         -v "$(pwd)/app:/src/app" \
         -v "$(pwd)/alembic:/src/alembic" \
         "$TEST_IMAGE_NAME" "$@"
@@ -39,19 +38,19 @@ function run_tests() {
 }
 
 function run_format() {
-    run_on_test_image black app tests features alembic
+    run_on_test_image black app tests alembic
 }
 
 function run_lint() {
-    run_on_test_image ruff check app tests features alembic
+    run_on_test_image ruff check app tests alembic
 }
 
 function run_lint_fix() {
-    run_on_test_image ruff check --fix app tests features alembic
+    run_on_test_image ruff check --fix app tests alembic
 }
 
 function run_isort() {
-    run_on_test_image isort --profile black app tests features alembic
+    run_on_test_image isort --profile black app tests alembic
 }
 
 function start_services() {

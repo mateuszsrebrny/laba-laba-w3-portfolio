@@ -1,7 +1,9 @@
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-scenarios("manage_token.feature")
+from tests.config import TOKENS_ENDPOINT
+
+scenarios("features/manage_token.feature")
 
 
 # Reusable fixture for marking tokens
@@ -9,7 +11,7 @@ scenarios("manage_token.feature")
 def mark_token(client):
     def _mark_token(token, is_stable):
         payload = {"token": token, "is_stable": is_stable}
-        response = client.post("/tokens", json=payload)
+        response = client.post(TOKENS_ENDPOINT, json=payload)
         return response
 
     return _mark_token
@@ -28,7 +30,7 @@ def mark_as_stablecoin(token, mark_token):
     )
 )
 def verify_token_is_stablecoin(token, client):
-    response = client.get(f"/tokens/{token}")
+    response = client.get(f"{TOKENS_ENDPOINT}/{token}")
     assert response.status_code == 200
     token_data = response.json()
     assert token_data["name"] == token
@@ -48,7 +50,7 @@ def mark_as_non_stablecoin(token, mark_token):
     )
 )
 def verify_token_is_non_stablecoin(token, client):
-    response = client.get(f"/tokens/{token}")
+    response = client.get(f"{TOKENS_ENDPOINT}/{token}")
     assert response.status_code == 200
     token_data = response.json()
     assert token_data["name"] == token
