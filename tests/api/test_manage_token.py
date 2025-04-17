@@ -3,7 +3,7 @@ from pytest_bdd import given, parsers, scenarios, then, when
 
 from tests.config import TOKENS_ENDPOINT
 
-scenarios("manage_token.feature")
+scenarios("features/manage_token.feature")
 
 
 # Reusable fixture for marking tokens

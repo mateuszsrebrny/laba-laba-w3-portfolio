@@ -3,7 +3,7 @@ from multiprocessing import Process
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import given
+from pytest_bdd import given, parsers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -103,6 +103,16 @@ def mark_token(client):
         assert response.status_code == 200
 
     return _mark_token
+
+
+@given(parsers.parse('"{token}" is marked as a stablecoin'))
+def mark_as_stablecoin(token, mark_token):
+    mark_token(token, is_stable=True)
+
+
+@given(parsers.parse('"{token}" is marked as a non-stablecoin'))
+def mark_token_as_non_stablecoin(token, mark_token):
+    mark_token(token, is_stable=False)
 
 
 @given("the API is running")

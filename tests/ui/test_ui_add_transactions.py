@@ -1,7 +1,7 @@
 from pytest_bdd import given, scenarios, then, when
 
 # Load the feature file
-scenarios("ui/add_transaction.feature")
+scenarios("features/add_transaction.feature")
 
 
 @given("I am on the 'Add Transaction' page")
@@ -32,9 +32,15 @@ def submit_form(page):
 
 @then("I should see a success message mentioning BTC and DAI")
 def verify_success_message(page):
-    success_message = page.locator(
-        "#message .alert-success"
-    ).inner_text()  # Locate success message
+    success_message = None
+    try:
+        success_message = page.locator("#message .alert-success").inner_text(
+            timeout=2000
+        )
+    except Exception as e:
+        print(f"HTML at failure: {page.content()}")
+        raise e
+
     assert "Transaction added: timestamp" in success_message
     assert "token 'BTC'" in success_message
     assert "stable_coin 'DAI'" in success_message
