@@ -64,21 +64,13 @@ def process_add_transaction(
     if from_token_obj.is_stable:
         stablecoin = from_token
         non_stablecoin = to_token
-        stablecoin_amount = from_amount
-        non_stablecoin_amount = to_amount
+        final_usd = -from_amount
+        final_amount = to_amount
     else:
         stablecoin = to_token
         non_stablecoin = from_token
-        stablecoin_amount = to_amount
-        non_stablecoin_amount = from_amount
-
-    # Determine if it's a buy or sell of the non-stablecoin
-    if from_token_obj.is_stable:
-        final_amount = non_stablecoin_amount  # Positive for buy
-        final_usd = stablecoin_amount
-    else:
-        final_amount = -non_stablecoin_amount  # Negative for sell
-        final_usd = -stablecoin_amount
+        final_usd = to_amount
+        final_amount = -from_amount
 
     try:
         new_transaction = Transaction(

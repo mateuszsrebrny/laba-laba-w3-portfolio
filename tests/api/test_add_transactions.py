@@ -44,15 +44,19 @@ def verify_transaction_recorded(
     assert response.status_code == 200
     response_text = response.text
 
+    print(response_text)
+
     # Check that transaction details appear in the response
     assert (
         str(timestamp) in response_text
     ), f"Timestamp {timestamp} not found in response"
     assert token in response_text, f"Token {token} not found in response"
-    assert str(amount) in response_text, f"Amount {amount} not found in response"
     assert (
-        str(total_usd) in response_text
-    ), f"Total USD {total_usd} not found in response"
+        f"<td>{amount}</td>" in response_text
+    ), f"Amount '{amount}' not found in response"
+    assert (
+        f"<td>{total_usd}</td>" in response_text
+    ), f"Total USD '{total_usd}' not found in response"
 
 
 @given(parsers.parse('"{token}" is not marked in any way'))
