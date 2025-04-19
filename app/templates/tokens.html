@@ -32,7 +32,7 @@
 
         document.addEventListener('htmx:afterRequest', function (event) {
             const xhr = event.detail.xhr;
-            if (xhr.status === 200) {
+            if (xhr.status === 200 || xhr.status === 201) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
                     showMessage(response.message, 'success');
