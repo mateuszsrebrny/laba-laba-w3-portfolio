@@ -27,7 +27,7 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
     pytest.last_payload = payload
     response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 @then(
@@ -161,7 +161,7 @@ def add_transaction_different_token_same_timestamp(
     # This should succeed
     response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
-    assert response.status_code == 200  # This should work since it's a different token
+    assert response.status_code == 201  # This should work since it's a different token
 
 
 @then("the second transactions should be recorded successfully in the system")

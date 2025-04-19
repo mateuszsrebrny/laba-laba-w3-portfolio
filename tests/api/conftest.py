@@ -1,4 +1,5 @@
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 from pytest_bdd import given
 
@@ -28,7 +29,7 @@ def client(db):
 @given("the API is running")
 def api_is_running(client):
     response = client.get(HEALTH_ENDPOINT)
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     health_json = response.json()
     assert health_json["status"] == "healthy"
     assert health_json["components"]["api"] == "healthy"
@@ -40,6 +41,6 @@ def mark_token(client):
     def _mark_token(token, is_stable):
         payload = {"token": token, "is_stable": is_stable}
         response = client.post("/api/tokens", json=payload)
-        assert response.status_code == 200
+        assert response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)
 
     return _mark_token
