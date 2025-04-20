@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -94,7 +94,8 @@ async def add_transaction_form(
         dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
     except Exception as e:
         return JSONResponse(
-            content={"error": f"Invalid timestamp format: {e}"}, status_code=400
+            content={"error": f"Invalid timestamp format: {e}"},
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     # Create the TransactionCreate model instance using form data.

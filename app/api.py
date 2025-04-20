@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.exc import IntegrityError
@@ -100,22 +100,22 @@ def process_add_transaction(
             content={
                 "error": f"'{from_token}' is not recognized. Please add it first."
             },
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
     if not to_token_obj:
         return JSONResponse(
             content={"error": f"'{to_token}' is not recognized. Please add it first."},
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
     if from_token_obj.is_stable and to_token_obj.is_stable:
         return JSONResponse(
             content={"error": "Both tokens cannot be stablecoins"},
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
     if not from_token_obj.is_stable and not to_token_obj.is_stable:
         return JSONResponse(
             content={"error": "One of the tokens must be a stablecoin"},
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     # Determine which is the stablecoin and which is the non-stablecoin
@@ -146,7 +146,7 @@ def process_add_transaction(
             content={
                 "error": f"Transaction for '{non_stablecoin}' at '{timestamp}' already exists."
             },
-            status_code=409,
+            status_code=status.HTTP_409_CONFLICT,
         )
 
     return {
@@ -279,7 +279,7 @@ async def add_token_api(token_data: TokenCreate, db: Session = Depends(get_db)):
                 content={
                     "error": f"'{token}' is already marked as a {stability_type}."
                 },
-                status_code=409,
+                status_code=status.HTTP_409_CONFLICT,
             )
         # Token exists with matching data - return 200 OK
         return JSONResponse(
@@ -336,6 +336,6 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
     if not token:
         return JSONResponse(
             content={"error": f"Token '{token_name}' not found."},
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
         )
     return {"name": token.name, "is_stable": token.is_stable}
