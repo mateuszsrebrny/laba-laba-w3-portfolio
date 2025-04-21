@@ -1,4 +1,5 @@
 import pytest
+from fastapi import status
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from tests.config import TRANSACTIONS_ENDPOINT, UI_HOME
@@ -27,7 +28,7 @@ def add_transaction(timestamp, from_token, to_token, from_amount, to_amount, cli
     pytest.last_payload = payload
     response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
 
 
 @then(
@@ -41,7 +42,7 @@ def verify_transaction_recorded(
     """Verify that a transaction with the specified details is shown on the list."""
 
     response = client.get(UI_HOME)
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     response_text = response.text
 
     print(response_text)
@@ -161,7 +162,9 @@ def add_transaction_different_token_same_timestamp(
     # This should succeed
     response = client.post(TRANSACTIONS_ENDPOINT, json=payload)
     pytest.last_response = response
-    assert response.status_code == 201  # This should work since it's a different token
+    assert (
+        response.status_code == status.HTTP_201_CREATED
+    )  # This should work since it's a different token
 
 
 @then("the second transactions should be recorded successfully in the system")

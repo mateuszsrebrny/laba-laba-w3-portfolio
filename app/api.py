@@ -284,7 +284,7 @@ async def add_token_api(token_data: TokenCreate, db: Session = Depends(get_db)):
         # Token exists with matching data - return 200 OK
         return JSONResponse(
             content={"status": "success", "message": f"Token '{token}' already exists"},
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             headers={"HX-Trigger": "tokenAdded"},
         )
 
@@ -298,7 +298,7 @@ async def add_token_api(token_data: TokenCreate, db: Session = Depends(get_db)):
             "status": "success",
             "message": f"Token '{token}' marked as {'stablecoin' if is_stable else 'non-stablecoin'}",
         },
-        status_code=201,
+        status_code=status.HTTP_201_CREATED,
         headers={"HX-Trigger": "tokenAdded"},
     )
 
