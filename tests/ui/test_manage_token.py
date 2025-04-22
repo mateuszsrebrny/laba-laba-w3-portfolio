@@ -21,9 +21,11 @@ def submit_form(page):
 
 @then("I should see a success message \"Token 'AAVE' marked as non-stablecoin\"")
 def verify_success_message(page):
-    success_message = page.locator(
-        "#message .alert-success"
-    ).inner_text()  # Locate success message
+    success_message_locator = page.locator("#message .alert-success")
+    success_message_locator.wait_for(
+        state="visible", timeout=2000
+    )  # Wait up to 10 seconds
+    success_message = success_message_locator.inner_text()
     assert "'AAVE' marked as non-stablecoin" in success_message
 
 
