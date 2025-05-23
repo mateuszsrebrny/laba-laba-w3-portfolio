@@ -20,9 +20,11 @@ def fill_transaction_form(page):
     # Click on the timestamp input to open Flatpickr's date picker
     page.click('input[name="timestamp"]')
 
-    # Select a date using Flatpickr's UI (if applicable)
+    # Select a date using Flatpickr's UI
     page.click(
-        '.flatpickr-day[aria-label="April 12, 2025"]'
+        #'.flatpickr-day[aria-label="May 12, 2025"]',
+        '.flatpickr-day[aria-label*="12"]',
+        timeout=3000,
     )  # Adjust selector based on your Flatpickr configuration
 
 
