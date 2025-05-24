@@ -1,7 +1,13 @@
+import io
+import re
+import warnings
 from datetime import datetime
+from typing import List
 
-from fastapi import APIRouter, Depends, status
+import easyocr
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from fastapi.responses import JSONResponse
+from PIL import Image
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -339,3 +345,161 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return {"name": token.name, "is_stable": token.is_stable}
+
+
+class ExtractedTransaction(BaseModel):
+    timestamp: datetime
+    from_token: str
+    to_token: str
+    from_amount: float
+    to_amount: float
+
+
+@router.post("/transactions/extract", response_class=JSONResponse)
+async def extract_transactions_from_image(
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Extract transactions from a Debank screenshot and process them.
+    """
+    # Validate file is an image
+    if not image.content_type or not image.content_type.startswith("image/"):
+        return JSONResponse(
+            content={"error": "Invalid file format. Please upload an image."},
+            status_code=400,
+        )
+
+    try:
+        # Read the image
+        contents = await image.read()
+        img = Image.open(io.BytesIO(contents))
+
+        # Suppress the specific pin_memory warning
+        warnings.filterwarnings("ignore", message=".*pin_memory.*no accelerator.*")
+
+        # Extract text using OCR
+        reader = easyocr.Reader(["en"], download_enabled=False, gpu=False)
+        result = reader.readtext(img)
+        extracted_text = " ".join([text[1] for text in result])
+
+        # Parse the text to extract transaction data
+        transactions = parse_debank_screenshot(extracted_text)
+
+        if not transactions:
+            return JSONResponse(
+                content={
+                    "status": "info",
+                    "message": "No transactions found in the image. Extracted: "
+                    + extracted_text,
+                },
+                status_code=200,
+            )
+
+        # Process and save each transaction
+        results = []
+        for t in transactions:
+            result = process_add_transaction(
+                timestamp=t.timestamp,
+                from_token=t.from_token,
+                to_token=t.to_token,
+                from_amount=t.from_amount,
+                to_amount=t.to_amount,
+                db=db,
+            )
+            results.append(result)
+
+        # Count successful transactions
+        successful = sum(
+            1 for r in results if isinstance(r, dict) and r.get("status") == "success"
+        )
+
+        return {
+            "status": "success" if successful > 0 else "info",
+            "message": f"Added {successful} out of {len(transactions)} transactions from the image.",
+            "details": results,
+        }
+
+    except Exception as e:
+        return JSONResponse(
+            content={"error": f"Failed to process image: {str(e)}"},
+            status_code=500,
+        )
+
+
+def parse_debank_screenshot(text: str) -> List[ExtractedTransaction]:
+    """
+    Parse text extracted from a Debank screenshot to identify transactions.
+    """
+
+    transactions = []
+    text = text.replace("\n", " ").replace("\r", " ")
+
+    # Split by "Contract Interaction"
+    sections = text.split("Contract Interaction")
+
+    for i, section in enumerate(sections[1:], 1):
+        section = section.strip()
+        if not section:
+            continue
+
+        curr_transaction = {}
+
+        # More flexible regex patterns to handle OCR errors
+        from_patterns = [
+            r"-\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)",
+            r"-(\d+(?:\.\d+)?)\s+([A-Z]+)",
+        ]
+
+        for pattern in from_patterns:
+            from_match = re.search(pattern, section)
+            if from_match:
+                curr_transaction["from_amount"] = float(from_match.group(1))
+                curr_transaction["from_token"] = from_match.group(2)
+                break
+
+        to_patterns = [
+            r"\+\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\(\$[\d,.]+\)",
+            r"\+(\d+(?:\.\d+)?)\s+([A-Z]+)",
+        ]
+
+        for pattern in to_patterns:
+            to_match = re.search(pattern, section)
+            if to_match:
+                curr_transaction["to_amount"] = float(to_match.group(1))
+                curr_transaction["to_token"] = to_match.group(2)
+                break
+
+        # Handle timestamp with flexible separators
+        timestamp_patterns = [
+            r"(\d{4}/\d{2}/\d{2})\s+(\d{2})[.:](\d{2})[.:](\d{2})",
+            r"(\d{4}/\d{2}/\d{2})\s+(\d{1,2})[.:](\d{2})[.:](\d{2})",
+        ]
+
+        for pattern in timestamp_patterns:
+            timestamp_match = re.search(pattern, section)
+            if timestamp_match:
+                try:
+                    date_part = timestamp_match.group(1)
+                    hour = timestamp_match.group(2).zfill(2)
+                    minute = timestamp_match.group(3)
+                    second = timestamp_match.group(4)
+                    timestamp_str = f"{date_part} {hour}:{minute}:{second}"
+                    curr_transaction["timestamp"] = datetime.strptime(
+                        timestamp_str, "%Y/%m/%d %H:%M:%S"
+                    )
+                    break
+                except ValueError:
+                    continue
+
+        # If we have all required fields, add the transaction
+        if all(
+            k in curr_transaction
+            for k in ["timestamp", "from_token", "to_token", "from_amount", "to_amount"]
+        ):
+            try:
+                transactions.append(ExtractedTransaction(**curr_transaction))
+            except Exception:
+                pass
+
+    return transactions

@@ -20,8 +20,10 @@ def upload_debank_screenshot(client):
         files = {"image": (os.path.basename(SAMPLE_IMAGE_PATH), f, "image/jpg")}
         response = client.post(EXTRACT_ENDPOINT, files=files)
 
+    print(response)
+    print(response.json())
     pytest.last_response = response
-    # assert response.status_code == 200
+    assert response.status_code == 200
 
 
 @then("the transactions should be extracted and stored in the database")
