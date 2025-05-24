@@ -9,3 +9,7 @@ pymysql
 cryptography
 alembic
 pydantic-settings
+pillow 
+python-multipart
+easyocr
+

@@ -13,6 +13,10 @@ COPY requirements.txt /src/
 RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
     /root/.local/bin/uv pip install --system -r ./requirements.txt
 
+# Pre-download ocr models
+RUN python -c "from easyocr import Reader; reader = Reader(['en'], download_enabled=True);"
+
+
 COPY alembic.ini /src/alembic.ini
 COPY scripts /src/scripts
 

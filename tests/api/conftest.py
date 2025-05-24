@@ -1,7 +1,7 @@
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from pytest_bdd import given
+from pytest_bdd import given, parsers, then
 
 from app.database import get_db
 from app.main import app
@@ -44,3 +44,12 @@ def mark_token(client):
         assert response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)
 
     return _mark_token
+
+
+@then(
+    parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"')
+)
+def check_error_message(error_code, error_msg):
+    assert pytest.last_response.status_code == error_code
+    json_body = pytest.last_response.json()
+    assert "error" in json_body
