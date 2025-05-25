@@ -87,6 +87,7 @@ function docker_prune() {
 
 function tar_4_llm() {
     tar czf source.tgz app tests pytest.ini
+    ls -lh source.tgz
 }
 
 CMD="$1"
