@@ -1,16 +1,9 @@
 import pytest
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import parsers, scenarios, then, when
 
 from tests.config import TOKENS_ENDPOINT
 
 scenarios("features/manage_token.feature")
-
-
-# Scenario: Marking a token as a stablecoin
-@when(parsers.parse('I mark the token "{token}" as a stablecoin'))
-def mark_as_stablecoin(token, mark_token):
-    response = mark_token(token, True)
-    pytest.last_response = response
 
 
 @then(
@@ -29,8 +22,7 @@ def verify_token_is_stablecoin(token, client):
 # Scenario: Marking a token as a non-stablecoin
 @when(parsers.parse('I mark the token "{token}" as a non-stablecoin'))
 def mark_as_non_stablecoin(token, mark_token):
-    response = mark_token(token, False)
-    pytest.last_response = response
+    pytest.last_response = mark_token(token, False)
 
 
 @then(
@@ -44,12 +36,6 @@ def verify_token_is_non_stablecoin(token, client):
     token_data = response.json()
     assert token_data["name"] == token
     assert token_data["is_stable"] is False
-
-
-# Scenario: Preventing duplicate token entries
-@given(parsers.parse('"{token}" is marked as a stablecoin'))
-def given_token_is_already_stablecoin(token, mark_token):
-    mark_token(token, True, expected_statuses=(200,))
 
 
 @when(parsers.parse('I try to mark "{token}" as a non-stablecoin'))
@@ -66,3 +52,18 @@ def verify_error_message(error_code, error_msg):
     json_body = pytest.last_response.json()
     assert "error" in json_body
     assert json_body["error"] == error_msg
+
+
+@when(parsers.parse('I mark the token "{token}" as a stablecoin'))
+def mark_token_first_time(token, mark_token):
+    pytest.response = mark_token(token, is_stable=True, expected_statuses=(201,))
+
+
+@when(parsers.parse('I mark the token "{token}" as a stablecoin again'))
+def mark_token_second_time(token, mark_token):
+    pytest.response = mark_token(token, is_stable=True, expected_statuses=(200,))
+
+
+@then(parsers.parse("the response status code should be {code:d}"))
+def assert_status_code(code):
+    assert pytest.response.status_code == code
