@@ -85,6 +85,10 @@ function docker_prune() {
     docker image prune -f
 }
 
+function tar_4_llm() {
+    tar czf source.tgz app tests pytest.ini
+}
+
 CMD="$1"
 shift || true
 
@@ -140,6 +144,9 @@ case "$CMD" in
     ;;
   docker_prune)
     docker_prune
+    ;;
+  tar_4_llm)
+    tar_4_llm
     ;;
   *)
     echo "Usage: $0 COMMAND [optional PARAMS]"
