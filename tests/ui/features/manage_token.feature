@@ -1,3 +1,4 @@
+@slow
 Feature: Manage Tokens
 
   Scenario: Successfully adding a new token

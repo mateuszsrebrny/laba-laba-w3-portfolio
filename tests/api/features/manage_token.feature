@@ -1,3 +1,4 @@
+@fast
 Feature: Managing tokens
 
   Scenario: Marking "DAI" as a stablecoin

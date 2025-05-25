@@ -34,7 +34,7 @@ function run_on_test_image() {
 }
 
 function run_tests() {
-    run_on_test_image
+    run_on_test_image $@
 }
 
 function run_format() {
@@ -93,7 +93,7 @@ case "$CMD" in
     build_images
     ;;
   tests)
-    run_tests
+    run_tests "$@"
     ;;
   start)
     run_tests

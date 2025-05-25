@@ -1,5 +1,6 @@
 Feature: Extract transactions from Debank screenshots
 
+  @slow
   Scenario: Extracting transaction data from a Debank screenshot
     Given the API is running
     And "DAI" is marked as a stablecoin
@@ -8,6 +9,7 @@ Feature: Extract transactions from Debank screenshots
     Then the transactions should be extracted and stored in the database
     And I should see the extracted transactions in the response
 
+  @slow
   Scenario: Handling an invalid image upload
     Given the API is running
     When I upload an invalid image file

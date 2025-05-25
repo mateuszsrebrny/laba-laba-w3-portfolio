@@ -36,14 +36,13 @@ def api_is_running(client):
     assert health_json["components"]["ui"] == "healthy"
 
 
+# post_token version using local client
 @pytest.fixture
-def mark_token(client):
-    def _mark_token(token, is_stable):
-        payload = {"token": token, "is_stable": is_stable}
-        response = client.post("/api/tokens", json=payload)
-        assert response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)
+def post_token(client):
+    def _post_token(token, is_stable):
+        return client.post("/api/tokens", json={"token": token, "is_stable": is_stable})
 
-    return _mark_token
+    return _post_token
 
 
 @then(

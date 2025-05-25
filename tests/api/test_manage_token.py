@@ -6,17 +6,6 @@ from tests.config import TOKENS_ENDPOINT
 scenarios("features/manage_token.feature")
 
 
-# Reusable fixture for marking tokens
-@pytest.fixture
-def mark_token(client):
-    def _mark_token(token, is_stable):
-        payload = {"token": token, "is_stable": is_stable}
-        response = client.post(TOKENS_ENDPOINT, json=payload)
-        return response
-
-    return _mark_token
-
-
 # Scenario: Marking a token as a stablecoin
 @when(parsers.parse('I mark the token "{token}" as a stablecoin'))
 def mark_as_stablecoin(token, mark_token):
@@ -60,13 +49,12 @@ def verify_token_is_non_stablecoin(token, client):
 # Scenario: Preventing duplicate token entries
 @given(parsers.parse('"{token}" is marked as a stablecoin'))
 def given_token_is_already_stablecoin(token, mark_token):
-    response = mark_token(token, True)
-    assert response.status_code == 200
+    mark_token(token, True, expected_statuses=(200,))
 
 
 @when(parsers.parse('I try to mark "{token}" as a non-stablecoin'))
 def try_to_mark_as_non_stablecoin(token, mark_token):
-    response = mark_token(token, False)
+    response = mark_token(token, False, expected_statuses=(409,))
     pytest.last_response = response
 
 
