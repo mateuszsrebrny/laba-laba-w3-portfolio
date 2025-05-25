@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from pytest_bdd import scenarios, then, when
+from pytest_bdd import parsers, scenarios, then, when
 
 # Load the scenarios
 scenarios("features/extract_transactions.feature")
@@ -26,27 +26,21 @@ def upload_debank_screenshot(client):
     assert response.status_code == 200
 
 
-@then("the transactions should be extracted and stored in the database")
-def verify_transactions_stored(client, db):
-    """Verify that transactions were extracted and stored in the database."""
-    response_data = pytest.last_response.json()
-
-    # Verify the response indicates success
-    assert response_data.get("status") == "success"
-    assert "Added" in response_data.get("message", "")
-
-    # Verify transactions were added to the database
-    # This depends on your specific database verification approach
-
-
-@then("I should see the extracted transactions in the response")
-def verify_transactions_in_response():
-    """Verify that transaction details are included in the response."""
-    response_data = pytest.last_response.json()
-
-    # Verify details are present
-    assert "details" in response_data
-    assert len(response_data["details"]) > 0
+@then(
+    parsers.parse(
+        'the response should include a transaction with timestamp "{timestamp}", token "{token}", amount "{amount:f}", stable_coin "{stable_coin}", and total_usd "{total_usd:f}"'
+    )
+)
+def check_transaction_detail_fields(timestamp, token, amount, stable_coin, total_usd):
+    details = pytest.last_response.json().get("details", [])
+    assert any(
+        tx["timestamp"] == timestamp
+        and tx["token"] == token
+        and tx["amount"] == amount
+        and tx["stable_coin"] == stable_coin
+        and tx["total_usd"] == total_usd
+        for tx in details
+    ), "Expected transaction not found in response"
 
 
 @when("I upload an invalid image file")

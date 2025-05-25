@@ -6,8 +6,7 @@ Feature: Extract transactions from Debank screenshots
     And "DAI" is marked as a stablecoin
     And "AAVE" is marked as a non-stablecoin
     When I upload a Debank screenshot containing transactions
-    Then the transactions should be extracted and stored in the database
-    And I should see the extracted transactions in the response
+    Then the response should include a transaction with timestamp "2025-02-03T04:02:29", token "AAVE", amount "0.4612", stable_coin "DAI", and total_usd "-100.0"
 
   @slow
   Scenario: Handling an invalid image upload

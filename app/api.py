@@ -157,6 +157,11 @@ def process_add_transaction(
 
     return {
         "status": "success",
+        "timestamp": timestamp,
+        "token": non_stablecoin,
+        "amount": final_amount,
+        "stable_coin": stablecoin,
+        "total_usd": final_usd,
         "message": f"Transaction added: timestamp '{timestamp}', token '{non_stablecoin}', amount '{final_amount}', stable_coin '{stablecoin}', total_usd '{final_usd}'.",
     }
 
