@@ -72,6 +72,15 @@ def check_transaction_detail_fields(timestamp, token, amount, stable_coin, total
     ), "Expected transaction not found with all matching fields"
 
 
+@then("the response should include 1 failed section with error")
+def check_failed_section():
+    data = pytest.last_response.json()
+    failed = data.get("failed", [])
+    assert len(failed) == 1
+    assert "section" in failed[0]
+    assert "error" in failed[0]
+
+
 @when("I upload an invalid image file")
 def upload_invalid_file(client):
     """Upload an invalid file to the extract endpoint."""
@@ -93,6 +102,13 @@ linch
 +3.9982 AAVE
 ($1,112.67)
 2025/02/04 04.37.39
+Contract Interaction
+quickswap
+100 DAI
+(s99.99)
++0.4612 AAVE
+($128.36)
+2025/02/05 04.02.29
 Contract Interaction
 1inch
 -100 DAI

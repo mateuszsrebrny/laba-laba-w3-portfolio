@@ -2,7 +2,6 @@ import io
 import re
 import warnings
 from datetime import datetime
-from typing import List
 
 import easyocr
 from fastapi import UploadFile
@@ -21,12 +20,13 @@ class ExtractedTransaction(BaseModel):
     to_amount: float
 
 
-def parse_debank_screenshot(text: str) -> List["ExtractedTransaction"]:
+def parse_debank_screenshot(text: str):
     """
     Parse text extracted from a Debank screenshot to identify transactions.
     """
 
     transactions = []
+    failures = []
     text = text.replace("\n", " ").replace("\r", " ")
 
     # Split by "Contract Interaction"
@@ -90,17 +90,27 @@ def parse_debank_screenshot(text: str) -> List["ExtractedTransaction"]:
             else:
                 print(f"No timestamp match in: {section}")
 
+        required_keys = [
+            "timestamp",
+            "from_token",
+            "to_token",
+            "from_amount",
+            "to_amount",
+        ]
+
         # If we have all required fields, add the transaction
-        if all(
-            k in curr_transaction
-            for k in ["timestamp", "from_token", "to_token", "from_amount", "to_amount"]
-        ):
+        if all(k in curr_transaction for k in required_keys):
             try:
                 transactions.append(ExtractedTransaction(**curr_transaction))
-            except Exception:
-                pass
+            except Exception as e:
+                failures.append({"section": section, "error": str(e)})
+        else:
+            missing = [k for k in required_keys if k not in curr_transaction]
+            failures.append(
+                {"section": section, "error": f"Missing fields: {', '.join(missing)}"}
+            )
 
-    return transactions
+    return transactions, failures
 
 
 def get_extracted_text(contents: bytes) -> str:
@@ -114,7 +124,7 @@ def get_extracted_text(contents: bytes) -> str:
 async def extract_transactions_from_image_upload(image: UploadFile, db):
     contents = await image.read()
     extracted_text = get_extracted_text(contents)
-    transactions = parse_debank_screenshot(extracted_text)
+    transactions, parse_failures = parse_debank_screenshot(extracted_text)
 
     if not transactions:
         return JSONResponse(
@@ -128,16 +138,26 @@ async def extract_transactions_from_image_upload(image: UploadFile, db):
 
     # Process and save each transaction
     results = []
+    failures = list(parse_failures)
     for t in transactions:
-        result = process_add_transaction(
-            timestamp=t.timestamp,
-            from_token=t.from_token,
-            to_token=t.to_token,
-            from_amount=t.from_amount,
-            to_amount=t.to_amount,
-            db=db,
-        )
-        results.append(result)
+        try:
+            result = process_add_transaction(
+                timestamp=t.timestamp,
+                from_token=t.from_token,
+                to_token=t.to_token,
+                from_amount=t.from_amount,
+                to_amount=t.to_amount,
+                db=db,
+            )
+            results.append(
+                {
+                    "status": "success",
+                    **result,
+                    "message": f"Transaction added: {result}",
+                }
+            )
+        except Exception as e:
+            failures.append({"section": str(t), "error": str(e)})
 
     # Count successful transactions
     successful = sum(
@@ -148,4 +168,5 @@ async def extract_transactions_from_image_upload(image: UploadFile, db):
         "status": "success" if successful > 0 else "info",
         "message": f"Added {successful} out of {len(transactions)} transactions from the image.",
         "details": results,
+        "failed": failures,
     }
