@@ -1,3 +1,4 @@
+@fast
 Feature: API Health Check
 
   Scenario: Verify the API is running

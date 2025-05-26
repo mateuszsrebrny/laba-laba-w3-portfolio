@@ -9,6 +9,17 @@ from sqlalchemy.pool import StaticPool
 from app.config import get_settings
 from app.models import Base
 
+
+def pytest_configure(config):
+    # make absolutely sure these names are known before collection starts
+    for name in ("fast", "slow"):
+        config.addinivalue_line(
+            "markers",
+            f"{name}: marks tests as {name} (added dynamically so pytest "
+            "doesn't warn)",
+        )
+
+
 # Use an in-memory SQLite database for testing
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
@@ -38,6 +49,18 @@ def db():
     finally:
         db_session.close()
         Base.metadata.drop_all(bind=test_engine)  # Cleanup after test
+
+
+@pytest.fixture
+def mark_token(post_token):
+    def _mark_token(token, is_stable, expected_statuses=(200, 201)):
+        response = post_token(token, is_stable)
+        assert (
+            response.status_code in expected_statuses
+        ), f"Expected one of {expected_statuses}, got {response.status_code}: {response.text}"
+        return response
+
+    return _mark_token
 
 
 @given(parsers.parse('"{token}" is marked as a stablecoin'))

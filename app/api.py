@@ -1,13 +1,14 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Token, Transaction
+from app.logic.transactions import process_add_transaction
+from app.models import Token
+from app.ocr import extract_transactions_from_image_upload
 
 router = APIRouter(prefix="/api", tags=["API"])
 
@@ -58,101 +59,6 @@ class TransactionCreate(BaseModel):
             }
         }
     )
-
-
-def process_add_transaction(
-    timestamp: datetime,
-    from_token: str,
-    to_token: str,
-    from_amount: float,
-    to_amount: float,
-    db: Session,
-):
-    """
-    Process and validate a transaction between two tokens.
-
-    This function implements the business logic for token transactions:
-    - Validates that both tokens exist in the database
-    - Ensures that exactly one token is a stablecoin
-    - Calculates final USD values and token amounts
-    - Stores the transaction in the database
-
-    Args:
-        timestamp (datetime): When the transaction occurred
-        from_token (str): The source token symbol
-        to_token (str): The destination token symbol
-        from_amount (float): Amount of the source token
-        to_amount (float): Amount of the destination token
-        db (Session): Database session for querying and saving
-
-    Returns:
-        dict or JSONResponse: Success message on success, or error response on failure
-
-    Raises:
-        IntegrityError: If a transaction with the same token and timestamp already exists
-    """
-    # Validate that tokens exist and get their stability status
-    from_token_obj = db.query(Token).filter(Token.name == from_token).first()
-    to_token_obj = db.query(Token).filter(Token.name == to_token).first()
-
-    if not from_token_obj:
-        return JSONResponse(
-            content={
-                "error": f"'{from_token}' is not recognized. Please add it first."
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-    if not to_token_obj:
-        return JSONResponse(
-            content={"error": f"'{to_token}' is not recognized. Please add it first."},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-    if from_token_obj.is_stable and to_token_obj.is_stable:
-        return JSONResponse(
-            content={"error": "Both tokens cannot be stablecoins"},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-    if not from_token_obj.is_stable and not to_token_obj.is_stable:
-        return JSONResponse(
-            content={"error": "One of the tokens must be a stablecoin"},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    # Determine which is the stablecoin and which is the non-stablecoin
-    if from_token_obj.is_stable:
-        stablecoin = from_token
-        non_stablecoin = to_token
-        final_usd = -from_amount
-        final_amount = to_amount
-    else:
-        stablecoin = to_token
-        non_stablecoin = from_token
-        final_usd = to_amount
-        final_amount = -from_amount
-
-    try:
-        new_transaction = Transaction(
-            timestamp=timestamp,
-            token=non_stablecoin,
-            amount=final_amount,
-            stable_coin=stablecoin,
-            total_usd=final_usd,
-        )
-        db.add(new_transaction)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        return JSONResponse(
-            content={
-                "error": f"Transaction for '{non_stablecoin}' at '{timestamp}' already exists."
-            },
-            status_code=status.HTTP_409_CONFLICT,
-        )
-
-    return {
-        "status": "success",
-        "message": f"Transaction added: timestamp '{timestamp}', token '{non_stablecoin}', amount '{final_amount}', stable_coin '{stablecoin}', total_usd '{final_usd}'.",
-    }
 
 
 @router.post(
@@ -339,3 +245,29 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return {"name": token.name, "is_stable": token.is_stable}
+
+
+@router.post("/transactions/extract", response_class=JSONResponse)
+async def extract_transactions_from_image(
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Extract transactions from a Debank screenshot and process them.
+    """
+    # Validate file is an image
+    if not image.content_type or not image.content_type.startswith("image/"):
+        return JSONResponse(
+            content={"error": "Invalid file format. Please upload an image."},
+            status_code=400,
+        )
+
+    try:
+
+        return await extract_transactions_from_image_upload(image, db)
+
+    except Exception as e:
+        return JSONResponse(
+            content={"error": f"Failed to process image: {str(e)}"},
+            status_code=500,
+        )

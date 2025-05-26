@@ -41,11 +41,13 @@ def page(playwright, http_server):
     browser.close()
 
 
+# mark_token version using http
 @pytest.fixture
-def mark_token():
-    def _mark_token(token, is_stable):
-        payload = {"token": token, "is_stable": is_stable}
-        response = requests.post("http://127.0.0.1:11111/api/tokens", json=payload)
-        assert response.status_code == 200
+def post_token():
+    def _post_token(token, is_stable):
+        return requests.post(
+            "http://localhost:11111/api/tokens",
+            json={"token": token, "is_stable": is_stable},
+        )
 
-    return _mark_token
+    return _post_token

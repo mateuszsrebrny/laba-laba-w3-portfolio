@@ -1,3 +1,4 @@
+@slow
 Feature: Application Navigation
 
   Scenario: Navigating to Tokens Page
