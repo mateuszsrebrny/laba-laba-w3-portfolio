@@ -34,6 +34,7 @@ def parse_debank_screenshot(text: str) -> List["ExtractedTransaction"]:
 
     for i, section in enumerate(sections[1:], 1):
         section = section.strip()
+        print(f"section: {section}")
         if not section:
             continue
 
@@ -84,7 +85,10 @@ def parse_debank_screenshot(text: str) -> List["ExtractedTransaction"]:
                     )
                     break
                 except ValueError:
+                    print(f"Failed to parse: {timestamp_str}")
                     continue
+            else:
+                print(f"No timestamp match in: {section}")
 
         # If we have all required fields, add the transaction
         if all(

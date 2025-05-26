@@ -82,7 +82,10 @@ function install_githooks() {
 }
 
 function docker_prune() {
+    echo Pruning images: docker image prune -f
     docker image prune -f
+    echo Pruning system: docker system prune -a --volumes -f
+    docker system prune -a --volumes -f
 }
 
 function tar_4_llm() {
