@@ -44,6 +44,8 @@ def upload_fake_debank_screenshot(client):
 def check_transaction_detail_fields(timestamp, token, amount, stable_coin, total_usd):
     details = pytest.last_response.json().get("details", [])
 
+    print(pytest.last_response.json())
+
     # Check if each field has at least one match
     assert any(
         tx["timestamp"] == timestamp for tx in details

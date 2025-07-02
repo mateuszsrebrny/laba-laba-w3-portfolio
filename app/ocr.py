@@ -98,6 +98,8 @@ def parse_debank_screenshot(text: str):
             "to_amount",
         ]
 
+        print(curr_transaction)
+
         # If we have all required fields, add the transaction
         if all(k in curr_transaction for k in required_keys):
             try:
