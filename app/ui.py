@@ -108,7 +108,10 @@ async def add_transaction_form(
     )
 
     # Call the existing API logic and return its response.
-    return await add_transaction_api(transaction_data, db)
+    response = await add_transaction_api(transaction_data, db)
+    if response.status_code == status.HTTP_201_CREATED:
+        response.status_code = status.HTTP_200_OK
+    return response
 
 
 @router.get("/tokens", response_class=HTMLResponse)

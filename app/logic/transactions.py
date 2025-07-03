@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from fastapi import status
-from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -34,7 +33,7 @@ def process_add_transaction(
         db (Session): Database session for querying and saving
 
     Returns:
-        dict or JSONResponse: Success message on success, or error response on failure
+        dict: Success message on success, or error response on failure
 
     Raises:
         IntegrityError: If a transaction with the same token and timestamp already exists
@@ -44,27 +43,29 @@ def process_add_transaction(
     to_token_obj = db.query(Token).filter(Token.name == to_token).first()
 
     if not from_token_obj:
-        return JSONResponse(
-            content={
-                "error": f"'{from_token}' is not recognized. Please add it first."
-            },
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return {
+            "status": "error",
+            "error": f"'{from_token}' is not recognized. Please add it first.",
+            "status_code": status.HTTP_400_BAD_REQUEST,
+        }
     if not to_token_obj:
-        return JSONResponse(
-            content={"error": f"'{to_token}' is not recognized. Please add it first."},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return {
+            "status": "error",
+            "error": f"'{to_token}' is not recognized. Please add it first.",
+            "status_code": status.HTTP_400_BAD_REQUEST,
+        }
     if from_token_obj.is_stable and to_token_obj.is_stable:
-        return JSONResponse(
-            content={"error": "Both tokens cannot be stablecoins"},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return {
+            "status": "error",
+            "error": "Both tokens cannot be stablecoins",
+            "status_code": status.HTTP_400_BAD_REQUEST,
+        }
     if not from_token_obj.is_stable and not to_token_obj.is_stable:
-        return JSONResponse(
-            content={"error": "One of the tokens must be a stablecoin"},
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
+        return {
+            "status": "error",
+            "error": "One of the tokens must be a stablecoin",
+            "status_code": status.HTTP_400_BAD_REQUEST,
+        }
 
     # Determine which is the stablecoin and which is the non-stablecoin
     if from_token_obj.is_stable:
@@ -90,12 +91,11 @@ def process_add_transaction(
         db.commit()
     except IntegrityError:
         db.rollback()
-        return JSONResponse(
-            content={
-                "error": f"Transaction for '{non_stablecoin}' at '{timestamp}' already exists."
-            },
-            status_code=status.HTTP_409_CONFLICT,
-        )
+        return {
+            "status": "error",
+            "error": f"Transaction for '{non_stablecoin}' at '{timestamp}' already exists.",
+            "status_code": status.HTTP_409_CONFLICT,
+        }
 
     return {
         "status": "success",

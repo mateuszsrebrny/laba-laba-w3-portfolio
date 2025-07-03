@@ -25,3 +25,15 @@ Feature: Extract transactions from Debank screenshots
     Then the response should include a transaction with timestamp "2025-02-04T04:02:29", token "AAVE", amount "0.4612", stable_coin "DAI", and total_usd "-100.0"
     And the response should include a transaction with timestamp "2025-02-04T04:37:39", token "AAVE", amount "3.9982", stable_coin "DAI", and total_usd "-900.0"
     And the response should include 1 failed section with error
+
+  @fast
+  Scenario Outline: Parsing valid transactions from mocked OCR
+    Given OCR is mocked to return "<ocr_text>"
+    When I upload a fake Debank screenshot
+    Then the response should include a transaction with timestamp "<timestamp>", token "<token>", amount "<amount>", stable_coin "<stable_coin>", and total_usd "<total_usd>"
+  
+    Examples:
+      | ocr_text                                  | timestamp             | token | amount  | stable_coin | total_usd |
+      | Contract Interaction\nlinch\n-900 DAI\n($899.91)\n+3.9982 AAVE\n($1,112.67)\n2025/02/06 05.47.49 | 2025-02-06T05:47:49   | AAVE  | 3.9982     | DAI        | -900.0    |
+
+

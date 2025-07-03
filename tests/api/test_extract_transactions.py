@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
@@ -93,10 +94,7 @@ def upload_invalid_file(client):
     pytest.last_response = response
 
 
-@given("OCR is mocked to return multiple transactions")
-def mock_ocr(monkeypatch):
-    def fake_get_extracted_text(_: bytes) -> str:
-        return """
+DEFAULT_OCR_TEXT = """
 Contract Interaction
 linch
 -900 DAI
@@ -118,6 +116,21 @@ Contract Interaction
 +0.4612 AAVE
 ($128.36)
 2025/02/04 04.02.29
-        """
+"""
+
+
+@given("OCR is mocked to return multiple transactions")
+@given(parsers.parse('OCR is mocked to return "{ocr_text}"'))
+def mock_ocr(monkeypatch, ocr_text: Optional[str] = None):
+    """
+    Patch app.ocr.get_extracted_text so tests can inject arbitrary text from the
+    feature file.  When the parameter <ocr_text> is not provided (legacy step)
+    we fall back to DEFAULT_OCR_TEXT.
+    """
+    text = ocr_text if ocr_text is not None else DEFAULT_OCR_TEXT
+
+    def fake_get_extracted_text(_: bytes) -> str:
+        # Allow \n literals inside Examples table cells
+        return text.replace("\\n", "\n")
 
     monkeypatch.setattr(ocr, "get_extracted_text", fake_get_extracted_text)

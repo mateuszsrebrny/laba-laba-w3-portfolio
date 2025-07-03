@@ -35,18 +35,12 @@ def submit_form(page):
 
 @then("I should see a success message mentioning BTC and DAI")
 def verify_success_message(page):
-    success_message = None
-    try:
-        success_message = page.locator("#message .alert-success").inner_text(
-            timeout=2000
-        )
-    except Exception as e:
-        print(f"HTML at failure: {page.content()}")
-        raise e
 
-    assert "Transaction added: timestamp" in success_message
-    assert "token 'BTC'" in success_message
-    assert "stable_coin 'DAI'" in success_message
+    banner = page.locator("#message .alert-success")
+    expect(banner).to_be_visible()
+    expect(banner).to_contain_text("Transaction added: timestamp")
+    expect(banner).to_contain_text("token 'BTC'")
+    expect(banner).to_contain_text("stable_coin 'DAI'")
 
 
 @then("the transaction form should be reloaded")

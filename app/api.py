@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
@@ -114,7 +115,7 @@ async def add_transaction_api(
     Returns:
         JSONResponse: Success confirmation or error details
     """
-    return process_add_transaction(
+    result = process_add_transaction(
         timestamp=transaction_data.timestamp,
         from_token=transaction_data.from_token,
         to_token=transaction_data.to_token,
@@ -122,6 +123,23 @@ async def add_transaction_api(
         to_amount=transaction_data.to_amount,
         db=db,
     )
+
+    #    status_code = (
+    #        result.get("status_code", status.HTTP_201_CREATED)
+    #        if result.get("status") != "error"
+    #        else result.get("status_code", status.HTTP_400_BAD_REQUEST)
+    #    )
+
+    encoded_result = jsonable_encoder(result)
+
+    if result.get("status") == "error":
+        # Fall back to 400 if no specific code was supplied
+        return JSONResponse(
+            content=encoded_result,
+            status_code=result.get("status_code", status.HTTP_400_BAD_REQUEST),
+        )
+
+    return JSONResponse(content=encoded_result, status_code=status.HTTP_201_CREATED)
 
 
 @router.post(
