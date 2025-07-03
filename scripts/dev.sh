@@ -30,6 +30,7 @@ function run_on_test_image() {
         -v "$(pwd)/tests:/src/tests" \
         -v "$(pwd)/app:/src/app" \
         -v "$(pwd)/alembic:/src/alembic" \
+        -v "$(pwd)/pytest.ini:/src/pytest.ini" \
         "$TEST_IMAGE_NAME" "$@"
 }
 
