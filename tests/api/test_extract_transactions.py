@@ -106,7 +106,7 @@ Contract Interaction
 quickswap
 100 DAI
 (s99.99)
-+0.4612 AAVE
+0.4612 AAVE
 ($128.36)
 2025/02/05 04.02.29
 Contract Interaction

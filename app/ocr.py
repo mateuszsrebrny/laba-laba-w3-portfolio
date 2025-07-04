@@ -40,30 +40,57 @@ def parse_debank_screenshot(text: str):
 
         curr_transaction = {}
 
-        # More flexible regex patterns to handle OCR errors
-        from_patterns = [
-            r"-\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)",
-            r"-(\d+(?:\.\d+)?)\s+([A-Z]+)",
-        ]
+        amount_pattern = r"([+-]?)\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)"
 
-        for pattern in from_patterns:
-            from_match = re.search(pattern, section)
-            if from_match:
-                curr_transaction["from_amount"] = float(from_match.group(1))
-                curr_transaction["from_token"] = from_match.group(2)
-                break
+        # Find all amounts with their signs
+        matches = re.finditer(amount_pattern, section)
+        amounts = []
 
-        to_patterns = [
-            r"\+\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\(\$[\d,.]+\)",
-            r"\+(\d+(?:\.\d+)?)\s+([A-Z]+)",
-        ]
+        for match in matches:
+            sign = match.group(1)  # '', '+', or '-'
+            amount = float(match.group(2))
+            token = match.group(3)
 
-        for pattern in to_patterns:
-            to_match = re.search(pattern, section)
-            if to_match:
-                curr_transaction["to_amount"] = float(to_match.group(1))
-                curr_transaction["to_token"] = to_match.group(2)
-                break
+            amounts.append({"sign": sign, "amount": amount, "token": token})
+
+        print(
+            f"Found amounts: {[(a['amount'], a['token'], a['sign']) for a in amounts]}"
+        )
+
+        # Process based on signs found
+        if len(amounts) == 2:
+            # Categorize amounts
+            plus_amount = None
+            minus_amount = None
+            unsigned_amount = None
+
+            for amount_info in amounts:
+                if amount_info["sign"] == "+":
+                    plus_amount = amount_info
+                elif amount_info["sign"] == "-":
+                    minus_amount = amount_info
+                else:  # empty string = no sign
+                    unsigned_amount = amount_info
+
+            # Decision logic based on what we found
+            if plus_amount and minus_amount:
+                # Both explicit: use as-is
+                curr_transaction["from_amount"] = minus_amount["amount"]
+                curr_transaction["from_token"] = minus_amount["token"]
+                curr_transaction["to_amount"] = plus_amount["amount"]
+                curr_transaction["to_token"] = plus_amount["token"]
+            elif plus_amount and unsigned_amount:
+                # Plus + unsigned: unsigned becomes from (negative)
+                curr_transaction["from_amount"] = unsigned_amount["amount"]
+                curr_transaction["from_token"] = unsigned_amount["token"]
+                curr_transaction["to_amount"] = plus_amount["amount"]
+                curr_transaction["to_token"] = plus_amount["token"]
+            elif minus_amount and unsigned_amount:
+                # Minus + unsigned: unsigned becomes to (positive)
+                curr_transaction["from_amount"] = minus_amount["amount"]
+                curr_transaction["from_token"] = minus_amount["token"]
+                curr_transaction["to_amount"] = unsigned_amount["amount"]
+                curr_transaction["to_token"] = unsigned_amount["token"]
 
         # Handle timestamp with flexible separators
         timestamp_patterns = [

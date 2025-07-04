@@ -35,5 +35,6 @@ Feature: Extract transactions from Debank screenshots
     Examples:
       | ocr_text                                  | timestamp             | token | amount  | stable_coin | total_usd |
       | Contract Interaction\nlinch\n-900 DAI\n($899.91)\n+3.9982 AAVE\n($1,112.67)\n2025/02/06 05.47.49 | 2025-02-06T05:47:49   | AAVE  | 3.9982     | DAI        | -900.0    |
+      | Contract Interaction\nquickswap\n800 DAI\n(s899.91)\n+3.1982 AAVE\n($1,112.67)\n2025/02/07 06.57.59 | 2025-02-07T06:57:59 | AAVE | 3.1982     | DAI        | -800.0    |
 
 
