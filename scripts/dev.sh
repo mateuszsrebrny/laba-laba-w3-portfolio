@@ -6,12 +6,14 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
-    env UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
+    #env UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
+    env UID=$(id -u) GID=$(id -g) docker compose build --progress=plain laba-laba-app 2>&1 | tee build.log
 }
 
 function build_tests() {
     echo "▶ Building test image..."
-    docker build -f Dockerfile.tests -t "$TEST_IMAGE_NAME" .
+    #docker build -f Dockerfile.tests -t "$TEST_IMAGE_NAME" .
+    docker build -f Dockerfile.tests --progress=plain -t "$TEST_IMAGE_NAME" . 2>&1 | tee build.log
 }
 
 function build_images() {
