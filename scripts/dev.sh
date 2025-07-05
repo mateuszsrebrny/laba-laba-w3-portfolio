@@ -6,12 +6,12 @@ TEST_IMAGE_NAME="laba-laba-tests"
 
 function build_app() {
     echo "▶ Building app image..."
-    env UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
+    env COMPOSE_BAKE=true UID=$(id -u) GID=$(id -g) docker compose build laba-laba-app
 }
 
 function build_tests() {
     echo "▶ Building test image..."
-    docker build -f Dockerfile.tests -t "$TEST_IMAGE_NAME" .
+    docker build --target test -t "$TEST_IMAGE_NAME" .
 }
 
 function build_images() {
