@@ -2,6 +2,7 @@ services:
   laba-laba-app:
     build: 
       context: .
+      target: production
       dockerfile: Dockerfile
     image: laba-laba-app
     container_name: laba-laba-dev-app
