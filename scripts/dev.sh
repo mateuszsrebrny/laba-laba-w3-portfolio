@@ -32,11 +32,12 @@ function run_on_test_image() {
         -v "$(pwd)/tests:/src/tests" \
         -v "$(pwd)/app:/src/app" \
         -v "$(pwd)/alembic:/src/alembic" \
+        -v "$(pwd)/pytest.ini:/src/pytest.ini" \
         "$TEST_IMAGE_NAME" "$@"
 }
 
 function run_tests() {
-    run_on_test_image
+    run_on_test_image $@
 }
 
 function run_format() {
@@ -84,7 +85,15 @@ function install_githooks() {
 }
 
 function docker_prune() {
+    echo Pruning images: docker image prune -f
     docker image prune -f
+    echo Pruning system: docker system prune -a --volumes -f
+    docker system prune -a --volumes -f
+}
+
+function tar_4_llm() {
+    tar czf source.tgz app tests pytest.ini
+    ls -lh source.tgz
 }
 
 CMD="$1"
@@ -95,7 +104,7 @@ case "$CMD" in
     build_images
     ;;
   tests)
-    run_tests
+    run_tests "$@"
     ;;
   start)
     run_tests
@@ -142,6 +151,9 @@ case "$CMD" in
     ;;
   docker_prune)
     docker_prune
+    ;;
+  tar_4_llm)
+    tar_4_llm
     ;;
   *)
     echo "Usage: $0 COMMAND [optional PARAMS]"
