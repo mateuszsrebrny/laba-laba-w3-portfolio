@@ -105,15 +105,6 @@ def try_add_transaction(
     pytest.last_response = response
 
 
-@then(
-    parsers.parse('I should get an error with code {error_code:d} saying "{error_msg}"')
-)
-def check_error_message(error_code, error_msg):
-    assert pytest.last_response.status_code == error_code
-    json_body = pytest.last_response.json()
-    assert "error" in json_body
-
-
 @when(
     parsers.parse(
         'I try to add another transaction with the same timestamp and from_token "{from_token}" and to_token "{to_token}", from_amount "{from_amount:f}", and to_amount "{to_amount:f}"'

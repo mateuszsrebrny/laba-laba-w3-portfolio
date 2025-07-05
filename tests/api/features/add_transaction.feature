@@ -1,3 +1,4 @@
+@fast
 Feature: Adding transactions
 
   Scenario: Adding a sell BTC to DAI transaction

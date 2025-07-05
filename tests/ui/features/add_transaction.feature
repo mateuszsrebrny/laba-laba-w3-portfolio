@@ -1,3 +1,4 @@
+@slow
 Feature: UI: add a transaction
 
   Scenario: Successfully adding a transaction
