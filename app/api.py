@@ -265,13 +265,149 @@ async def get_token(token_name: str, db: Session = Depends(get_db)):
     return {"name": token.name, "is_stable": token.is_stable}
 
 
-@router.post("/transactions/extract", response_class=JSONResponse)
+@router.post(
+    "/transactions/extract",
+    response_class=JSONResponse,
+    summary="Extract transactions from Debank screenshot",
+    description="Process a Debank screenshot image to automatically extract and add cryptocurrency transactions to your portfolio using OCR",
+    responses={
+        200: {
+            "description": "Image processed successfully (may contain successful transactions, failures, or no transactions found)",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "successful_extraction": {
+                            "summary": "Transactions successfully extracted and processed",
+                            "value": {
+                                "status": "success",
+                                "message": "Added 2 out of 2 transactions from the image.",
+                                "details": [
+                                    {
+                                        "status": "success",
+                                        "id": 123,
+                                        "timestamp": "2025-07-06T10:30:00",
+                                        "from_token": "USDC",
+                                        "to_token": "ETH",
+                                        "from_amount": 1000.0,
+                                        "to_amount": 0.3,
+                                        "message": "Transaction added: {...}",
+                                    }
+                                ],
+                                "failed": [],
+                            },
+                        },
+                        "partial_success": {
+                            "summary": "Some transactions processed, some failed",
+                            "value": {
+                                "status": "success",
+                                "message": "Added 1 out of 2 transactions from the image.",
+                                "details": [
+                                    {
+                                        "status": "success",
+                                        "id": 124,
+                                        "timestamp": "2025-07-06T11:00:00",
+                                        "from_token": "ETH",
+                                        "to_token": "USDC",
+                                        "from_amount": 0.5,
+                                        "to_amount": 1500.0,
+                                        "message": "Transaction added: {...}",
+                                    }
+                                ],
+                                "failed": [
+                                    {
+                                        "section": "Contract Interaction...",
+                                        "error": "Missing fields: timestamp",
+                                    }
+                                ],
+                            },
+                        },
+                        "no_transactions_found": {
+                            "summary": "No transactions detected in image",
+                            "value": {
+                                "status": "info",
+                                "message": "No transactions found in the image. Extracted: Contract Interaction some text but no valid transaction pattern",
+                            },
+                        },
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Invalid file format",
+            "content": {
+                "application/json": {
+                    "example": {"error": "Invalid file format. Please upload an image."}
+                }
+            },
+        },
+        500: {
+            "description": "Internal server error during image processing",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error": "Failed to process image: OCR processing failed"
+                    }
+                }
+            },
+        },
+    },
+)
 async def extract_transactions_from_image(
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
     """
-    Extract transactions from a Debank screenshot and process them.
+    Extract and process cryptocurrency transactions from a Debank screenshot using OCR.
+
+    This endpoint uses EasyOCR to automatically extract transaction data from uploaded
+    Debank screenshots and processes them through the same validation logic as manual entries.
+
+    ## How It Works
+    1. **OCR Processing**: Extracts text from the uploaded image using EasyOCR
+    2. **Pattern Matching**: Searches for "Contract Interaction" sections in the extracted text
+    3. **Transaction Parsing**: Uses regex patterns to identify:
+       - Amounts with +/- signs and token symbols
+       - Timestamps in format YYYY/MM/DD HH:MM:SS
+       - Token pairs for swaps
+    4. **Validation & Storage**: Each extracted transaction is validated and saved to database
+
+    ## Expected Image Format
+    The image should contain Debank transaction data with:
+    - **Contract Interaction** headers separating transactions
+    - **Amount patterns** like: `+1000.50 USDC ($1,000.50)` or `-0.5 ETH ($1,500.00)`
+    - **Timestamps** in format: `2025/07/06 10:30:45`
+    - Clear, readable text (avoid blurry or low-resolution images)
+
+    ## Response Structure
+
+    ### Success Response
+    - `status`: "success" (if any transactions added) or "info" (if none found)
+    - `message`: Summary of processing results
+    - `details`: Array of successfully processed transactions with full transaction data
+    - `failed`: Array of parsing failures with error descriptions
+
+    ### Transaction Details Include
+    - `id`: Database ID of the created transaction
+    - `timestamp`: Parsed transaction timestamp
+    - `from_token`/`to_token`: Token symbols involved in the swap
+    - `from_amount`/`to_amount`: Amounts for each token
+    - `status`: "success" for successfully added transactions
+
+    ## Common Parsing Scenarios
+    - **Explicit Signs**: `+1000 USDC` and `-0.5 ETH` → Clear buy/sell direction
+    - **Mixed Signs**: `+1000 USDC` and `0.5 ETH` → Unsigned amount treated as outgoing
+    - **Missing Data**: Transactions missing timestamps or amounts will appear in `failed` array
+
+    ## Error Handling
+    - **Parse Failures**: Individual transaction parsing errors are collected in `failed` array
+    - **Validation Errors**: Database validation failures (missing tokens, etc.) are included
+    - **OCR Issues**: Poor image quality may result in no transactions found
+
+    ## Tips for Best Results
+    - Use high-resolution, clear screenshots
+    - Ensure good contrast between text and background
+    - Crop images to focus on transaction data
+    - Include complete transaction information (timestamps, amounts, tokens)
     """
     # Validate file is an image
     if not image.content_type or not image.content_type.startswith("image/"):
