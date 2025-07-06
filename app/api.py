@@ -124,22 +124,14 @@ async def add_transaction_api(
         db=db,
     )
 
-    #    status_code = (
-    #        result.get("status_code", status.HTTP_201_CREATED)
-    #        if result.get("status") != "error"
-    #        else result.get("status_code", status.HTTP_400_BAD_REQUEST)
-    #    )
+    status_code = (
+        result.get("status_code", status.HTTP_201_CREATED)
+        if result.get("status") != "error"
+        else result.get("status_code", status.HTTP_400_BAD_REQUEST)
+    )
 
     encoded_result = jsonable_encoder(result)
-
-    if result.get("status") == "error":
-        # Fall back to 400 if no specific code was supplied
-        return JSONResponse(
-            content=encoded_result,
-            status_code=result.get("status_code", status.HTTP_400_BAD_REQUEST),
-        )
-
-    return JSONResponse(content=encoded_result, status_code=status.HTTP_201_CREATED)
+    return JSONResponse(content=encoded_result, status_code=status_code)
 
 
 @router.post(
