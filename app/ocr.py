@@ -40,7 +40,7 @@ def parse_debank_screenshot(text: str):
 
         curr_transaction = {}
 
-        amount_pattern = r"([+-]?)\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)"
+        amount_pattern = r"([+-]?)\s*([\d,]+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)"
 
         # Find all amounts with their signs
         matches = re.finditer(amount_pattern, section)
@@ -48,7 +48,9 @@ def parse_debank_screenshot(text: str):
 
         for match in matches:
             sign = match.group(1)  # '', '+', or '-'
-            amount = float(match.group(2))
+            amount_str = match.group(2).replace(",", "")
+            amount = float(amount_str)
+
             token = match.group(3)
 
             amounts.append({"sign": sign, "amount": amount, "token": token})
