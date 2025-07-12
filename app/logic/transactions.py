@@ -57,13 +57,13 @@ def process_add_transaction(
     if from_token_obj.is_stable and to_token_obj.is_stable:
         return {
             "status": "error",
-            "error": "Both tokens cannot be stablecoins",
+            "error": f"Both tokens cannot be stablecoins ('{from_token}' and '{to_token}' are)",
             "status_code": status.HTTP_400_BAD_REQUEST,
         }
     if not from_token_obj.is_stable and not to_token_obj.is_stable:
         return {
             "status": "error",
-            "error": "One of the tokens must be a stablecoin",
+            "error": f"One of the tokens must be a stablecoin ('{from_token}' and '{to_token}' are not)",
             "status_code": status.HTTP_400_BAD_REQUEST,
         }
 
