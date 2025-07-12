@@ -29,10 +29,35 @@ def parse_debank_screenshot(text: str):
     failures = []
     text = text.replace("\n", " ").replace("\r", " ")
 
-    # Split by "Contract Interaction"
-    sections = text.split("Contract Interaction")
+    # Define all possible transaction prefixes
+    transaction_prefixes = ["Contract Interaction", "fillOrderArgs"]
 
-    for i, section in enumerate(sections[1:], 1):
+    # Create a regex pattern that matches any of the prefixes
+    prefix_pattern = "|".join(re.escape(prefix) for prefix in transaction_prefixes)
+
+    # Split the text by any transaction prefix, keeping the delimiter
+    parts = re.split(f"({prefix_pattern})", text)
+
+    # Reconstruct sections with their prefixes
+    sections = []
+    current_section = ""
+
+    for i, part in enumerate(parts):
+        if part.strip() in transaction_prefixes:
+            # If we have a previous section, save it
+            if current_section.strip():
+                sections.append(current_section.strip())
+            # Start new section with this prefix
+            current_section = part
+        else:
+            # Add content to current section
+            current_section += part
+
+    # Don't forget the last section
+    if current_section.strip():
+        sections.append(current_section.strip())
+
+    for i, section in enumerate(sections, 1):
         section = section.strip()
         print(f"section: {section}")
         if not section:
