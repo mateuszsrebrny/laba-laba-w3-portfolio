@@ -66,7 +66,7 @@ def parse_debank_screenshot(text: str):
         curr_transaction = {}
 
         amount_pattern = (
-            r"([+-]?)\s*([\d,]+(?:\.\d+)?)\s+([a-zA-Z]+)\s*\([s$]?[\d,.]+\)"
+            r"([+-]?)\s*([\d,]+(?:\.\d+)?)\s*([a-zA-Z]+)\s*\([s$]?[\d,.]+\)"
         )
 
         # Find all amounts with their signs
