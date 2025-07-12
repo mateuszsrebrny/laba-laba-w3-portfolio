@@ -40,7 +40,7 @@ Feature: Extract transactions from Debank screenshots
       | Contract Interaction\nquickswap\n800 DAI\n(s799.91)\n+3.1982 wTAO\n($1,142.67)\n2025/02/07 06.57.59 | 2025-02-07T06:57:59 | wTAO | 3.1982     | DAI        | -800.0    |
       | Contract Interaction\nquickswap\n2.005 wTAO\n(s499.91)\n+500.01 DAI\n($1,312.67)\n2025/02/08 07.07.09 | 2025-02-08T07:07:09 | wTAO | -2.005   | DAI        | 500.01    |
       | Contract Interaction 1inch 1,800 DAI ($1,799.55) +4,308.6727 wTAO (61,518.13) 2024/04/13 16.34.49 | 2024-04-13T16:34:49 | wTAO | 4308.6727   | DAI        | -1800.0   |
-      | Contract Interaction 0x5b93..f995 1,008.587 DAI ($1,008.49) T +2.9089 wTAO ($932.28) 2025/02/07 15.15.11 | 2025-02-07T15:15:11 | wTAO | 2.9089 | DAI        | -1008.587 |
+      | Contract Interaction 0x5b93..f995 1,008.587 DAI ($1,008.49) T +2.9089 wTAO ($932.28) 2025/02/07.15.15.11 | 2025-02-07T15:15:11 | wTAO | 2.9089 | DAI        | -1008.587 |
       | fillOrderArgs Oxa904...ed36 -0.003 wTAO ($303.33) +298.9947 DAI ($298.96) 2024/12/08 23.02.00 | 2024-12-08T23:02:00 | wTAO | -0.003 | DAI        | 298.9947 |
       | Contract Interaction linch 1,000.011 wTAO ($297.10) +178.6021DAI ($298.05) 2025/02/06 05.26.54 | 2025-02-06T05:26:54 | wTAO | -1000.011 | DAI        | 178.6021 |
 

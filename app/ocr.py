@@ -123,8 +123,8 @@ def parse_debank_screenshot(text: str):
 
         # Handle timestamp with flexible separators
         timestamp_patterns = [
-            r"(\d{4}/\d{2}/\d{2})\s+(\d{2})[.:](\d{2})[.:](\d{2})",
-            r"(\d{4}/\d{2}/\d{2})\s+(\d{1,2})[.:](\d{2})[.:](\d{2})",
+            r"(\d{4}/\d{2}/\d{2})[\s.]+(\d{2})[.:](\d{2})[.:](\d{2})",
+            r"(\d{4}/\d{2}/\d{2})[\s.]+(\d{1,2})[.:](\d{2})[.:](\d{2})",
         ]
 
         for pattern in timestamp_patterns:
