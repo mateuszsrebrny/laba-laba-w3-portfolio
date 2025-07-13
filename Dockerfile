@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/tmp/easyocr-cache \
 FROM base AS production
 
 COPY alembic.ini /src/alembic.ini
-COPY scripts /src/scripts
+COPY scripts/app_start_cmd.sh /src/scripts/app_start_cmd.sh
 
 # will be overlaid for dev
 COPY alembic /src/alembic/
@@ -81,7 +81,7 @@ RUN --mount=type=cache,target=/tmp/ms-playwright \
 
 # Copy application code and config (this layer rebuilds when source changes)
 COPY alembic.ini /src/alembic.ini
-COPY scripts /src/scripts
+COPY scripts/dev.sh /src/scripts/dev.sh
 COPY alembic /src/alembic/
 COPY app /src/app
 COPY pytest.ini /src/
