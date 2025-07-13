@@ -20,6 +20,12 @@ class ExtractedTransaction(BaseModel):
     to_amount: float
 
 
+def fix_s_digit_ocr(text: str) -> str:
+    """Fix S followed by digit OCR errors (S0 -> 50, S1 -> 51, etc.)"""
+    # Replace S followed by a digit with 5 + that digit
+    return re.sub(r"S(\d)", r"5\1", text)
+
+
 def parse_debank_screenshot(text: str):
     """
     Parse text extracted from a Debank screenshot to identify transactions.
@@ -28,6 +34,7 @@ def parse_debank_screenshot(text: str):
     transactions = []
     failures = []
     text = text.replace("\n", " ").replace("\r", " ")
+    text = fix_s_digit_ocr(text)
 
     # Define all possible transaction prefixes
     transaction_prefixes = ["Contract Interaction", "fillOrderArgs"]

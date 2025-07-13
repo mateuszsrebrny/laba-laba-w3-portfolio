@@ -43,5 +43,6 @@ Feature: Extract transactions from Debank screenshots
       | Contract Interaction 0x5b93..f995 1,008.587 DAI ($1,008.49) T +2.9089 wTAO ($932.28) 2025/02/07.15.15.11 | 2025-02-07T15:15:11 | wTAO | 2.9089 | DAI        | -1008.587 |
       | fillOrderArgs Oxa904...ed36 -0.003 wTAO ($303.33) +298.9947 DAI ($298.96) 2024/12/08 23.02.00 | 2024-12-08T23:02:00 | wTAO | -0.003 | DAI        | 298.9947 |
       | Contract Interaction linch 1,000.011 wTAO ($297.10) +178.6021DAI ($298.05) 2025/02/06 05.26.54 | 2025-02-06T05:26:54 | wTAO | -1000.011 | DAI        | 178.6021 |
+      | Contract Interaction 1inch -S0wTAO ($107.69) +112.3998 DAI ($112.39) 2024/12/07 01.28.08 | 2024-12-07T01:28:08 | wTAO | -50.0| DAI        | 112.3998 |
 
 
