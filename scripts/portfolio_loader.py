@@ -31,49 +31,70 @@ class PortfolioLoader:
         """Extract transaction data from a single screenshot using multipart form data"""
         try:
             with open(image_path, "rb") as f:
+                filename = os.path.basename(image_path)
                 data = aiohttp.FormData()
                 data.add_field(
                     "image",
                     f,
-                    filename=os.path.basename(image_path),
+                    filename=filename,
                     content_type="image/jpeg",
                 )  # Adjust based on your image type
 
                 async with session.post(self.extract_endpoint, data=data) as response:
 
                     if response.status == 200:
-                        result = await response.json()
+                        response_detail = await response.json()
 
                         # Check if the response indicates success
-                        if result.get("status") == "success":
-                            return {
+                        if response_detail.get("status") == "success":
+                            tx_count = len(response_detail.get("details", []))
+
+                            result = {
                                 "status": "success",
                                 "image_path": image_path,
-                                "data": result,
-                                "transactions_found": len(result.get("details", [])),
+                                "data": response_detail,
+                                "transactions_found": tx_count,
                             }
+                            self.successful_transactions.append(result)
+                            print(
+                                f"✅ Successfully processed: {filename} ({tx_count} transactions found)"
+                            )
+
                         else:
                             # Handle cases where image processed but no transactions found
-                            return {
+                            # These might be considered successful OCR but no transactions
+                            result = {
                                 "status": "no_transactions",
                                 "image_path": image_path,
-                                "message": result.get(
+                                "message": response_detail.get(
                                     "message", "No transactions found"
                                 ),
-                                "data": result,
+                                "data": response_detail,
                             }
+                            self.successful_transactions.append(result)
+                            print(f"⚠️  Processed but no transactions: {filename}")
 
                     else:
                         error_detail = await response.json()
-                        return {
+                        result = {
                             "status": "error",
                             "image_path": image_path,
                             "error": f"HTTP {response.status}",
                             "message": error_detail,
                         }
+                        self.errors.append(result)
+                        print(f"❌ Error processing {filename}: HTTP {response.status}")
+
+                    self.save_results()
+                    return result
 
         except Exception as e:
-            return {"status": "error", "image_path": image_path, "error": str(e)}
+            error_str = str(e)
+            result = {"status": "error", "image_path": image_path, "error": error_str}
+            self.errors.append(result)
+            print(f"❌ Exception processing {filename}: {error_str}")
+            self.save_results()
+            return result
 
     async def process_screenshots(
         self, screenshot_paths: List[str], max_concurrent: int
@@ -94,40 +115,7 @@ class PortfolioLoader:
             connector=connector, timeout=timeout
         ) as session:
             tasks = [process_single(session, path) for path in screenshot_paths]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            # Process results
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    self.errors.append(
-                        {
-                            "status": "error",
-                            "image_path": screenshot_paths[i],
-                            "error": str(result),
-                        }
-                    )
-                    print(
-                        f"❌ Exception processing {os.path.basename(screenshot_paths[i])}: {result}"
-                    )
-                    continue
-
-                filename = os.path.basename(result["image_path"])
-
-                if result["status"] == "success":
-                    self.successful_transactions.append(result)
-                    tx_count = result.get("transactions_found", 0)
-                    print(
-                        f"✅ Successfully processed: {filename} ({tx_count} transactions found)"
-                    )
-
-                elif result["status"] == "no_transactions":
-                    # These might be considered successful OCR but no transactions
-                    self.successful_transactions.append(result)
-                    print(f"⚠️  Processed but no transactions: {filename}")
-
-                else:
-                    self.errors.append(result)
-                    print(f"❌ Error processing {filename}: {result['error']}")
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def get_image_files(
         self, directory: str, extensions: List[str] = None
@@ -250,9 +238,8 @@ async def main():
     # Process screenshots
     await loader.process_screenshots(screenshot_paths, max_concurrent=max_concurrent)
 
-    # Print summary and save results
+    # Print summary
     loader.print_summary()
-    loader.save_results()
 
     print(
         "\n🎉 Processing complete! Check extraction_results.json for detailed results."
