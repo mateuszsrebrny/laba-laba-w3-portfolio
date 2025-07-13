@@ -53,7 +53,7 @@ function run_lint_fix() {
 }
 
 function run_isort() {
-    run_on_test_image isort --profile black app tests alembic scripts/*.py
+    run_on_test_image isort --profile black --overwrite-in-place app tests alembic scripts/*.py
 }
 
 function start_services() {

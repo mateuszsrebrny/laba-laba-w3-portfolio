@@ -1,10 +1,10 @@
 import asyncio
-import aiohttp
 import json
-import re
-from typing import List, Dict, Set
-
 import os
+import re
+from typing import Dict, List, Set
+
+import aiohttp
 from dotenv import load_dotenv
 
 # Load environment variables
