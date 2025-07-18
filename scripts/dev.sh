@@ -31,6 +31,8 @@ function run_on_test_image() {
         -v "$(pwd)/app:/src/app" \
         -v "$(pwd)/alembic:/src/alembic" \
         -v "$(pwd)/pytest.ini:/src/pytest.ini" \
+        -v "$(pwd)/scripts/portfolio_loader.py:/src/scripts/portfolio_loader.py" \
+        -v "$(pwd)/scripts/token_loader.py:/src/scripts/token_loader.py" \
         "$TEST_IMAGE_NAME" "$@"
 }
 
@@ -39,19 +41,19 @@ function run_tests() {
 }
 
 function run_format() {
-    run_on_test_image black app tests alembic
+    run_on_test_image black app tests alembic scripts/*.py
 }
 
 function run_lint() {
-    run_on_test_image ruff check app tests alembic
+    run_on_test_image ruff check app tests alembic scripts/*.py
 }
 
 function run_lint_fix() {
-    run_on_test_image ruff check --fix app tests alembic
+    run_on_test_image ruff check --fix app tests alembic scripts/*.py
 }
 
 function run_isort() {
-    run_on_test_image isort --profile black app tests alembic
+    run_on_test_image isort --profile black --overwrite-in-place app tests alembic scripts/*.py
 }
 
 function start_services() {

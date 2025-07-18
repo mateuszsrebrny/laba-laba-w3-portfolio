@@ -20,6 +20,12 @@ class ExtractedTransaction(BaseModel):
     to_amount: float
 
 
+def fix_s_digit_ocr(text: str) -> str:
+    """Fix S followed by digit OCR errors (S0 -> 50, S1 -> 51, etc.)"""
+    # Replace S followed by a digit with 5 + that digit
+    return re.sub(r"S(\d)", r"5\1", text)
+
+
 def parse_debank_screenshot(text: str):
     """
     Parse text extracted from a Debank screenshot to identify transactions.
@@ -28,11 +34,37 @@ def parse_debank_screenshot(text: str):
     transactions = []
     failures = []
     text = text.replace("\n", " ").replace("\r", " ")
+    text = fix_s_digit_ocr(text)
 
-    # Split by "Contract Interaction"
-    sections = text.split("Contract Interaction")
+    # Define all possible transaction prefixes
+    transaction_prefixes = ["Contract Interaction", "fillOrderArgs"]
 
-    for i, section in enumerate(sections[1:], 1):
+    # Create a regex pattern that matches any of the prefixes
+    prefix_pattern = "|".join(re.escape(prefix) for prefix in transaction_prefixes)
+
+    # Split the text by any transaction prefix, keeping the delimiter
+    parts = re.split(f"({prefix_pattern})", text)
+
+    # Reconstruct sections with their prefixes
+    sections = []
+    current_section = ""
+
+    for i, part in enumerate(parts):
+        if part.strip() in transaction_prefixes:
+            # If we have a previous section, save it
+            if current_section.strip():
+                sections.append(current_section.strip())
+            # Start new section with this prefix
+            current_section = part
+        else:
+            # Add content to current section
+            current_section += part
+
+    # Don't forget the last section
+    if current_section.strip():
+        sections.append(current_section.strip())
+
+    for i, section in enumerate(sections, 1):
         section = section.strip()
         print(f"section: {section}")
         if not section:
@@ -40,7 +72,7 @@ def parse_debank_screenshot(text: str):
 
         curr_transaction = {}
 
-        amount_pattern = r"([+-]?)\s*(\d+(?:\.\d+)?)\s+([A-Z]+)\s*\([s$]?[\d,.]+\)"
+        amount_pattern = r"([+-]?)\s*([\d,]+(?:\.\d+)?)\s*([a-zA-Z]+(?:\([^)]+\))?[a-zA-Z]*)\s*\([s$]?[\d,.]+\)"
 
         # Find all amounts with their signs
         matches = re.finditer(amount_pattern, section)
@@ -48,7 +80,9 @@ def parse_debank_screenshot(text: str):
 
         for match in matches:
             sign = match.group(1)  # '', '+', or '-'
-            amount = float(match.group(2))
+            amount_str = match.group(2).replace(",", "")
+            amount = float(amount_str)
+
             token = match.group(3)
 
             amounts.append({"sign": sign, "amount": amount, "token": token})
@@ -94,8 +128,8 @@ def parse_debank_screenshot(text: str):
 
         # Handle timestamp with flexible separators
         timestamp_patterns = [
-            r"(\d{4}/\d{2}/\d{2})\s+(\d{2})[.:](\d{2})[.:](\d{2})",
-            r"(\d{4}/\d{2}/\d{2})\s+(\d{1,2})[.:](\d{2})[.:](\d{2})",
+            r"(\d{4}/\d{2}/\d{2})[\s.]+(\d{2})[.:](\d{2})[.:](\d{2})",
+            r"(\d{4}/\d{2}/\d{2})[\s.]+(\d{1,2})[.:](\d{2})[.:](\d{2})",
         ]
 
         for pattern in timestamp_patterns:

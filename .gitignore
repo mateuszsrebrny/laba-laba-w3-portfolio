@@ -8,5 +8,10 @@ instance/
 .idea/
 .vscode/
 .venv
+.venv.loader
+screens
 commit.txt
 load_data*.sh
+extraction_results.json
+extraction_results.*.json
+token_addition_results.json

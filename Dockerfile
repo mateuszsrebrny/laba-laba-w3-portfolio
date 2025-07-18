@@ -19,17 +19,19 @@ RUN --mount=type=cache,target=/root/.cache/uv,sharing=locked,id=uv-cache \
     uv pip install --system -r ./requirements.txt
 
 # Pre-download OCR models with cache mount
+ENV EASYOCR_MODULE_PATH=/opt/easyocr
 RUN --mount=type=cache,target=/tmp/easyocr-cache \
     mkdir -p /tmp/easyocr-cache && \
     export EASYOCR_MODULE_PATH=/tmp/easyocr-cache && \
     python -c "from easyocr import Reader; reader = Reader(['en'], download_enabled=True);" && \
-    cp -r /tmp/easyocr-cache ~/.EasyOCR
+    cp -r /tmp/easyocr-cache /opt/easyocr && \
+    chmod -R 755 /opt/easyocr
 
 # Production stage - clean and minimal
 FROM base AS production
 
 COPY alembic.ini /src/alembic.ini
-COPY scripts /src/scripts
+COPY scripts/app_start_cmd.sh /src/scripts/app_start_cmd.sh
 
 # will be overlaid for dev
 COPY alembic /src/alembic/
@@ -79,7 +81,7 @@ RUN --mount=type=cache,target=/tmp/ms-playwright \
 
 # Copy application code and config (this layer rebuilds when source changes)
 COPY alembic.ini /src/alembic.ini
-COPY scripts /src/scripts
+COPY scripts/dev.sh /src/scripts/dev.sh
 COPY alembic /src/alembic/
 COPY app /src/app
 COPY pytest.ini /src/

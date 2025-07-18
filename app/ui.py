@@ -33,7 +33,7 @@ async def home(
     This endpoint fetches all transactions from the database and displays them
     in a user-friendly interface.
     """
-    transactions = db.query(Transaction).all()
+    transactions = db.query(Transaction).order_by(Transaction.timestamp.desc()).all()
     return templates.TemplateResponse(
         request,
         "index.html",

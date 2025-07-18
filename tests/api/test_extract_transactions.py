@@ -102,15 +102,15 @@ linch
 +3.9982 AAVE
 ($1,112.67)
 2025/02/04 04.37.39
-Contract Interaction
-quickswap
+fillOrderArgs
+Oxa904...ed36
 100 DAI
 (s99.99)
 0.4612 AAVE
 ($128.36)
 2025/02/05 04.02.29
-Contract Interaction
-1inch
+fillOrderArgs
+Oxa904...ed36
 -100 DAI
 (s99.99)
 +0.4612 AAVE
